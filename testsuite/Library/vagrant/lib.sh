@@ -84,6 +84,30 @@ Set it before usage of library functions.
 
 vagrant_BOX_NAME=${vagrant_BOX_NAME:-"cdkv2"}
 
+true <<'=cut'
+=pod
+
+=item vagrant_BOX_PATH
+
+Path to file with vagrant box to be used by library functions.
+Set it before usage of library functions.
+
+=back
+
+
+=item vagrant_RHN_USERNAME
+
+Username for registration plugin.
+
+=back
+
+=item vagrant_RHN_PASSWORD
+
+Password for registration plugin.
+
+=back
+=cut
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #   Functions
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -93,7 +117,7 @@ true <<'=cut'
 
 =head1 FUNCTIONS
 
-=head2 
+=head2
 
 Install a vagrant plugin (uninstall first when needed).
 
@@ -139,7 +163,7 @@ vagrantPluginInstall() {
 true <<'=cut'
 =pod
 
-=head2 
+=head2
 
 Uninstall a vagrant plugin
 
@@ -171,6 +195,169 @@ vagrantPluginUninstall() {
     fi
     return 0
 }
+
+true <<'=cut'
+=pod
+
+=head2
+
+Check if file with vagrant box is provided. Path to vagrant box is expected in variable VAGRANT_BOX_PATH
+
+    vagrantBoxIsProvided
+
+=over
+
+=back
+
+Returns 0 when the plugin is path to vagrant is provided, non-zero otherwise.
+
+=cut
+
+vagrantBoxIsProvided() {
+        if [ "$vagrant_BOX_PATH" == "" ]; then
+            rlLogError "variable vagrant_BOX_PATH is empty"
+            return 1
+        fi
+        rlAssertExists $vagrant_BOX_PATH
+}
+
+
+true <<'=cut'
+=pod
+
+=head2
+
+Check if file with vagrant box is provided
+
+    vagrantRegistrationCredentialsProvided
+
+=over
+
+=back
+
+Returns 0 when the username and password for registration plugin are provided, non-zero otherwise.
+
+=cut
+
+vagrantRegistrationCredentialsProvided() {
+        # RHN_USER
+        if [ "$vagrant_RHN_USERNAME" == "" ]; then
+            rlLogError "variable vagrant_RHN_USERNAME is empty"
+            return 1
+        fi
+        # RHN_PASS
+        if [ "$vagrant_RHN_PASSWORD" == "" ]; then
+            rlLogError "variable vagrant_RHN_PASSWORD is empty"
+            return 1
+        fi
+}
+
+true <<'=cut'
+=pod
+
+=head2
+
+Add vagrant box (path in VAGRANT_BOX_PATH).
+
+    vagrantBoxAdd
+
+=over
+
+=back
+
+Returns 0 when te vagrant box is successfully added, non-zero otherwise.
+
+=cut
+
+vagrantBoxAdd() {
+    vagrant box list | grep "There are no installed boxes"
+    if [ $? == 1 ]; then
+        rlLogFatal "there are currently some vagrant boxes, remove them before runing this script"
+        exit 1
+    fi
+    rlRun "vagrant box add --name $vagrant_BOX_NAME $vagrant_BOX_PATH"
+    vagrant box list | grep $vagrant_BOX_NAME || rlFail "vagrant box was not added correctly"
+}
+
+true <<'=cut'
+=pod
+
+=head2
+
+Remove vagrant box (with name from vagrant_BOX_NAME variable)
+
+    vagrantBoxRemove
+
+=over
+
+=back
+
+Returns 0 when te vagrant box is successfully removed, non-zero otherwise.
+
+=cut
+
+vagrantBoxRemove() {
+    rlRun "vagrant box remove --force $vagrant_BOX_NAME"
+}
+
+true <<'=cut'
+=pod
+
+=head2
+
+Configure main Vagrantfile (in ~/.vagrant.d).
+
+    vagrantConfigureGeneralVagrantfile type
+
+=over
+
+=item type
+
+=back
+
+# TODO: update || remove
+Returns 0 when te vagrant box is successfully removed, non-zero otherwise.
+
+=cut
+
+vagrantConfigureGeneralVagrantfile () {
+    # takes one argument: skip, file, or env
+    # TODO: to be extended when we will need to configure more than registratino plugin && win workaround
+    if [ $# != 1 ]; then
+        rlFail "wrong number of argument, use single one: {skip,file,env}"
+    fi
+    generalVagrantfile=~/.vagrant.d/Vagrantfile
+    if [ "$HOST_PLATFORM" == "win" ]; then
+        # workaround for windows host
+        generalVagrantfile="c:\\Users\\$LOGNAME\\.vagrant.d\\Vagrantfile"
+        generalVagrantfile="/cygdrive/c/Users/$USER/.vagrant.d/Vagrantfile"
+        rm -f $reneralVagrantfile
+        echo 'ENV["VAGRANT_DETECTED_OS"] = ENV["VAGRANT_DETECTED_OS"].to_s + " cygwin"' >> $generalVagrantfile
+    else
+        rm -f $reneralVagrantfile
+    fi
+    echo "Vagrant.configure('2') do |config|" > $generalVagrantfile
+    # TODO: add WIN workaround if needed -> how to know test is running on windows?
+    case $1 in
+        skip)
+            echo "config.registration.skip = true" >> $generalVagrantfile
+            ;;
+        file)
+            echo "config.registration.username = '$vagrant_RHN_USERNAME'" >> $generalVagrantfile
+            echo "config.registration.password = '$vagrant_RHN_PASSWORD'" >> $generalVagrantfile
+            ;;
+        env)
+            echo "config.registration.username = ENV['USERNAME']" >> $generalVagrantfile
+            echo "config.registration.password = ENV['PASSWORD']" >> $generalVagrantfile
+            ;;
+        *)
+            echo "ERROR: unexpected argument '$1' for function registration_plugin_configure"
+            ;;
+    esac
+    echo "end" >> $generalVagrantfile
+    return
+}
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #   Verification
@@ -206,6 +393,7 @@ true <<'=cut'
 =item *
 
 David Kutalek <dkutalek@redhat.com>
+Ondrej Ptak <optak@redhat.com>
 
 =back
 

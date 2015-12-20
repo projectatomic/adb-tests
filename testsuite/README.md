@@ -40,9 +40,10 @@ Beakerlib on OS X
 -----------------
 TODO: howto install/use
 Install Virtualbox and Vagrant
+```bash
 # brew install gnu-getopt
 # brew install coreutils
-
+```
 
 How to run tests
 ================
@@ -52,16 +53,23 @@ every test need to be executed directly by running runtest.sh, see several examp
 
 On Linux
 --------
-Example:
+```bash
 #  vagrant_BOX_PATH=<path-to-vagrant-box> ./runtest.sh
+```
+```bash
 #  vagrant_BOX_PATH=<path-to-vagrant-box> vagrant_RHN_USERNAME=<username> vagrant_RHN_PASSWORD=<password> ./runtest.sh
+```
 
 On Windows
 ----------
 There are some differences on windows system, which is handled by library. It just need to know about it by setting HOST_PLATFORM.
+```bash
 #  vagrant_BOX_PATH=<path-to-vagrant-box> HOST_PLATFORM=win ./runtest.sh
+```
 
 On OS X
 -------
 On OS X, it's important to install and use gnu version of getopt, readlink and probably several more.
+```bash
 #  PATH="/usr/local/opt/coreutils/libexec/gnubin:/usr/local/Cellar/gnu-getopt/1.1.6/bin/:$PATH" vagrant_BOX_PATH=<path-to-vagrant-box> ./runtest.sh
+```

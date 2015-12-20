@@ -74,6 +74,8 @@ vagrant_PROVIDER=${vagrant_PROVIDER:-"virtualbox"}
 true <<'=cut'
 =pod
 
+=over
+
 =item vagrant_BOX_NAME
 
 Vagrant box name to be used by default by library functions.
@@ -87,6 +89,8 @@ vagrant_BOX_NAME=${vagrant_BOX_NAME:-"cdkv2"}
 true <<'=cut'
 =pod
 
+=over
+
 =item vagrant_BOX_PATH
 
 Path to file with vagrant box to be used by library functions.
@@ -94,12 +98,15 @@ Set it before usage of library functions.
 
 =back
 
+=over
 
 =item vagrant_RHN_USERNAME
 
 Username for registration plugin.
 
 =back
+
+=over
 
 =item vagrant_RHN_PASSWORD
 
@@ -117,7 +124,86 @@ true <<'=cut'
 
 =head1 FUNCTIONS
 
-=head2
+=head2 vagrantBoxIsProvided
+
+Check if file with vagrant box is provided. Path to vagrant box is expected in variable VAGRANT_BOX_PATH.
+
+    vagrantBoxIsProvided
+
+=over
+
+=back
+
+Returns 0 when the plugin is path to vagrant is provided and valid, non-zero otherwise.
+
+=cut
+
+vagrantBoxIsProvided() {
+        if [ "$vagrant_BOX_PATH" == "" ]; then
+            rlLogError "variable vagrant_BOX_PATH is empty"
+            return 1
+        fi
+        rlAssertExists $vagrant_BOX_PATH
+}
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+true <<'=cut'
+=pod
+
+=head2 vagrantBoxAdd
+
+Add vagrant box (path in VAGRANT_BOX_PATH).
+
+    vagrantBoxAdd
+
+=over
+
+=back
+
+Returns 0 when te vagrant box is successfully added, non-zero otherwise.
+
+=cut
+
+vagrantBoxAdd() {
+    vagrant box list | grep "There are no installed boxes"
+    if [ $? == 1 ]; then
+        rlLogFatal "there are currently some vagrant boxes, remove them before runing this script"
+        exit 1
+    fi
+    rlRun "vagrant box add --name $vagrant_BOX_NAME $vagrant_BOX_PATH"
+    vagrant box list | grep $vagrant_BOX_NAME || rlFail "vagrant box was not added correctly"
+}
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+true <<'=cut'
+=pod
+
+=head2 vagrantBoxRemove
+
+Remove vagrant box (with name from vagrant_BOX_NAME variable).
+
+    vagrantBoxRemove
+
+=over
+
+=back
+
+Returns 0 when te vagrant box is successfully removed, non-zero otherwise.
+
+=cut
+
+vagrantBoxRemove() {
+    rlRun "vagrant box remove --force $vagrant_BOX_NAME"
+}
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+true <<'=cut'
+=pod
+
+=head2 vagrantPluginInstall
 
 Install a vagrant plugin (uninstall first when needed).
 
@@ -127,7 +213,7 @@ Install a vagrant plugin (uninstall first when needed).
 
 =item name_or_file_path
 
-Vagrant plugin name (remote install) or file path (local install)
+Vagrant plugin name (remote install) or file path (local install).
 
 =back
 
@@ -163,7 +249,7 @@ vagrantPluginInstall() {
 true <<'=cut'
 =pod
 
-=head2
+=head2 vagrantPluginUninstall
 
 Uninstall a vagrant plugin
 
@@ -196,38 +282,14 @@ vagrantPluginUninstall() {
     return 0
 }
 
-true <<'=cut'
-=pod
-
-=head2
-
-Check if file with vagrant box is provided. Path to vagrant box is expected in variable VAGRANT_BOX_PATH
-
-    vagrantBoxIsProvided
-
-=over
-
-=back
-
-Returns 0 when the plugin is path to vagrant is provided, non-zero otherwise.
-
-=cut
-
-vagrantBoxIsProvided() {
-        if [ "$vagrant_BOX_PATH" == "" ]; then
-            rlLogError "variable vagrant_BOX_PATH is empty"
-            return 1
-        fi
-        rlAssertExists $vagrant_BOX_PATH
-}
-
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 true <<'=cut'
 =pod
 
-=head2
+=head2 vagrantRegistrationCredentialsProvided
 
-Check if file with vagrant box is provided
+Check if file with vagrant box is provided in variables vagrant_RHN_USERNAME and vagrant_RHN_PASSWORD
 
     vagrantRegistrationCredentialsProvided
 
@@ -252,58 +314,14 @@ vagrantRegistrationCredentialsProvided() {
         fi
 }
 
-true <<'=cut'
-=pod
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-=head2
-
-Add vagrant box (path in VAGRANT_BOX_PATH).
-
-    vagrantBoxAdd
-
-=over
-
-=back
-
-Returns 0 when te vagrant box is successfully added, non-zero otherwise.
-
-=cut
-
-vagrantBoxAdd() {
-    vagrant box list | grep "There are no installed boxes"
-    if [ $? == 1 ]; then
-        rlLogFatal "there are currently some vagrant boxes, remove them before runing this script"
-        exit 1
-    fi
-    rlRun "vagrant box add --name $vagrant_BOX_NAME $vagrant_BOX_PATH"
-    vagrant box list | grep $vagrant_BOX_NAME || rlFail "vagrant box was not added correctly"
-}
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 true <<'=cut'
 =pod
 
-=head2
-
-Remove vagrant box (with name from vagrant_BOX_NAME variable)
-
-    vagrantBoxRemove
-
-=over
-
-=back
-
-Returns 0 when te vagrant box is successfully removed, non-zero otherwise.
-
-=cut
-
-vagrantBoxRemove() {
-    rlRun "vagrant box remove --force $vagrant_BOX_NAME"
-}
-
-true <<'=cut'
-=pod
-
-=head2
+=head2 vagrantConfigureGeneralVagrantfile 
 
 Configure main Vagrantfile (in ~/.vagrant.d).
 
@@ -313,10 +331,13 @@ Configure main Vagrantfile (in ~/.vagrant.d).
 
 =item type
 
-=back
+skip: skip box registration
 
-# TODO: update || remove
-Returns 0 when te vagrant box is successfully removed, non-zero otherwise.
+file: credentials in general Vagrantfile
+
+env: credentials in variables USERNAME and PASSWORD
+
+=back
 
 =cut
 
@@ -358,6 +379,8 @@ vagrantConfigureGeneralVagrantfile () {
     return
 }
 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #   Verification
@@ -393,6 +416,9 @@ true <<'=cut'
 =item *
 
 David Kutalek <dkutalek@redhat.com>
+
+=item *
+
 Ondrej Ptak <optak@redhat.com>
 
 =back

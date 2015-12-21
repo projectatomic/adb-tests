@@ -27,7 +27,6 @@
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Include Beaker environment
-#. /usr/bin/rhts-environment.sh || exit 1
 . /usr/share/beakerlib/beakerlib.sh || exit 1
 
 
@@ -36,17 +35,27 @@ rlJournalStart
         rlImport 'testsuite/vagrant'
         rlRun "TmpDir=\$(mktemp -d)" 0 "Creating tmp directory"
         rlRun "pushd $TmpDir"
+        # configure general Vagrantfile,
+        #   mainly for cygwin workaround for windows
+        vagrantConfigureGeneralVagrantfile "skip"
     rlPhaseEnd
 
-    rlPhaseStartTest
-        rlRun "vagrantPluginInstall vagrant-adbinfo"
-        if [ _$VAGRANT_PLUGIN_ADBINFO_FILEPATH != '_' ]; then
-            rlRun "vagrantPluginInstall $VAGRANT_PLUGIN_ADBINFO_FILEPATH"
-        fi
+    rlPhaseStartTest remote_install
+        vagrant_PLUGINS_DIR='' vagrantPluginInstall vagrant-adbinfo --force
+        # run without running vm (fast smoke)
+        rlRun "vagrant adbinfo 2>&1 | grep 'target machine is required to run'"
     rlPhaseEnd
+
+  if [ "$vagrant_PLUGINS_DIR" != "" ];then
+    # vagrant_PLUGINS_DIR provided, test also local install of plugin
+    rlPhaseStartTest local_install
+        vagrantPluginInstall vagrant-adbinfo --force
+        # run without running vm (fast smoke)
+        rlRun "vagrant adbinfo 2>&1 | grep 'target machine is required to run'"
+    rlPhaseEnd
+  fi
 
     rlPhaseStartCleanup
-        rlRun "vagrantPluginUninstall vagrant-adbinfo"
         rlRun "popd"
         rlRun "rm -r $TmpDir" 0 "Removing tmp directory"
     rlPhaseEnd

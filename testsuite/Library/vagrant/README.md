@@ -21,6 +21,12 @@ and also other variables where you can find results of called functions.
     Vagrant provider to be used: kvm, virtualbox or vmware.
     Set it before usage of library functions.
 
+- vagrant\_SHARING
+
+    This variable defines if library funcions can reuse some objects.
+    Currently, vagrant box and vagrant plugins can be shared.
+    Value can be \`true\` or \`false\`, default is \`true\`.
+
 - vagrant\_BOX\_NAME
 
     Vagrant box name to be used by default by library functions.
@@ -30,6 +36,11 @@ and also other variables where you can find results of called functions.
 
     Path to file with vagrant box to be used by library functions.
     Set it before usage of library functions.
+
+- vagrant\_PLUGINS\_DIR
+
+    Path to directory with vagrant plugins (\*.gem) to install from.
+    If not provided, plugins are installed directly from upstream.
 
 - vagrant\_RHN\_USERNAME
 
@@ -43,17 +54,21 @@ and also other variables where you can find results of called functions.
 
 ## vagrantBoxIsProvided
 
-Check if file with vagrant box is provided. Path to vagrant box is expected in variable VAGRANT\_BOX\_PATH.
+Check if file with vagrant box is provided. Path to vagrant box is expected in variable vagrant\_BOX\_PATH.
 
     vagrantBoxIsProvided
 
 Returns 0 when the plugin is path to vagrant is provided and valid, non-zero otherwise.
+If vagrant\_SHARING is true, function also return 0 if vagrant already contain box vagrant\_BOX\_NAME.
 
 ## vagrantBoxAdd
 
 Add vagrant box (path in VAGRANT\_BOX\_PATH).
 
-    vagrantBoxAdd
+    vagrantBoxAdd [--force]
+
+> Add vagrant box. If vagrant\_SHARING is true, box is added only if not present.
+> If vagrant\_SHARING is false or parametr \`--force\` is added, vagrant box is removed first if already present.
 
 Returns 0 when te vagrant box is successfully added, non-zero otherwise.
 
@@ -67,13 +82,20 @@ Returns 0 when te vagrant box is successfully removed, non-zero otherwise.
 
 ## vagrantPluginInstall
 
-Install a vagrant plugin (uninstall first when needed).
+Install a vagrant plugin with given name.
+If vagrant SHARING is false or parameter \`--force\` is given,
+plugin is uninstalled first.
+Plugin will be installed from vagrant\_PLUGINS\_DIR if defined and from upstream otherwise.
 
-    vagrantPluginInstall name_or_file_path
+    vagrantPluginInstall name [--force]
 
-- name\_or\_file\_path
+- name
 
-    Vagrant plugin name (remote install) or file path (local install).
+    Vagrant plugin name.
+
+- --force
+
+    Enfoce reinstalling plugin.
 
 Returns 0 when the plugin is successfully installed, non-zero otherwise.
 

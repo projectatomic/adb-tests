@@ -76,6 +76,22 @@ true <<'=cut'
 
 =over
 
+=item vagrant_SHARING
+
+This variable defines if library funcions can reuse some objects.
+Currently, vagrant box and vagrant plugins can be shared.
+Value can be `true` or `false`, default is `true`.
+
+=back
+=cut
+
+vagrant_SHARING=${vagrant_SHARING:-"true"}
+
+true <<'=cut'
+=pod
+
+=over
+
 =item vagrant_BOX_NAME
 
 Vagrant box name to be used by default by library functions.
@@ -95,6 +111,15 @@ true <<'=cut'
 
 Path to file with vagrant box to be used by library functions.
 Set it before usage of library functions.
+
+=back
+
+=over
+
+=item vagrant_PLUGINS_DIR
+
+Path to directory with vagrant plugins (*.gem) to install from.
+If not provided, plugins are installed directly from upstream.
 
 =back
 
@@ -126,7 +151,7 @@ true <<'=cut'
 
 =head2 vagrantBoxIsProvided
 
-Check if file with vagrant box is provided. Path to vagrant box is expected in variable VAGRANT_BOX_PATH.
+Check if file with vagrant box is provided. Path to vagrant box is expected in variable vagrant_BOX_PATH.
 
     vagrantBoxIsProvided
 
@@ -135,12 +160,20 @@ Check if file with vagrant box is provided. Path to vagrant box is expected in v
 =back
 
 Returns 0 when the plugin is path to vagrant is provided and valid, non-zero otherwise.
+If vagrant_SHARING is true, function also return 0 if vagrant already contain box vagrant_BOX_NAME.
 
 =cut
 
 vagrantBoxIsProvided() {
-        if [ "$vagrant_BOX_PATH" == "" ]; then
-            rlLogError "variable vagrant_BOX_PATH is empty"
+        if [ "$vagrant_SHARING" == "true" ]; then
+            vagrant box list | grep "$vagrant_BOX_NAME" && return 0
+        fi
+        if [ "$vagrant_BOX_PATH" == "" ] ; then
+            if [ "$vagrant_SHARING" == "true" ]; then
+                rlLogFatal "Variable vagrant_BOX_PATH is empty and box $vagrant_BOX_NAME is not already added."
+            else
+                rlLogFatal "Variable vagrant_BOX_PATH is empty and sharing is not enabled."
+            fi
             return 1
         fi
         rlAssertExists $vagrant_BOX_PATH
@@ -155,9 +188,12 @@ true <<'=cut'
 
 Add vagrant box (path in VAGRANT_BOX_PATH).
 
-    vagrantBoxAdd
+    vagrantBoxAdd [--force]
 
 =over
+
+Add vagrant box. If vagrant_SHARING is true, box is added only if not present.
+If vagrant_SHARING is false or parametr `--force` is added, vagrant box is removed first if already present.
 
 =back
 
@@ -166,11 +202,10 @@ Returns 0 when te vagrant box is successfully added, non-zero otherwise.
 =cut
 
 vagrantBoxAdd() {
-    vagrant box list | grep "There are no installed boxes"
-    if [ $? == 1 ]; then
-        rlLogFatal "there are currently some vagrant boxes, remove them before runing this script"
-        exit 1
+    if [ "$vagrant_SHARING" == "false" -o "$1" == "--force" ]; then
+        vagrantBoxRemove || return 1
     fi
+    vagrant box list | grep $vagrant_BOX_NAME && return 0
     rlRun "vagrant box add --name $vagrant_BOX_NAME $vagrant_BOX_PATH"
     vagrant box list | grep $vagrant_BOX_NAME || rlFail "vagrant box was not added correctly"
 }
@@ -205,15 +240,22 @@ true <<'=cut'
 
 =head2 vagrantPluginInstall
 
-Install a vagrant plugin (uninstall first when needed).
+Install a vagrant plugin with given name.
+If vagrant SHARING is false or parameter `--force` is given,
+plugin is uninstalled first.
+Plugin will be installed from vagrant_PLUGINS_DIR if defined and from upstream otherwise.
 
-    vagrantPluginInstall name_or_file_path
+    vagrantPluginInstall name [--force]
 
 =over
 
-=item name_or_file_path
+=item name
 
-Vagrant plugin name (remote install) or file path (local install).
+Vagrant plugin name.
+
+=item --force
+
+Enfoce reinstalling plugin.
 
 =back
 
@@ -222,24 +264,25 @@ Returns 0 when the plugin is successfully installed, non-zero otherwise.
 =cut
 
 vagrantPluginInstall() {
-    # we need exactly one parameter
-    [ $# -ne 1 ] && { rlFail 'Wrong usage'; return 1; }
-
-    # get name from argument (strip postfix for file paths)
-    local name
-    name=$(echo $1 | sed 's/.*\/\(.*\)-[0-9]\.[0-9]\.[0-9]\.gem$/\1/')
-    
-    # uninstall if needed
-    if vagrant plugin list | grep $name; then
-        rlRun "vagrant plugin uninstall $name" 0,1
-        rlRun "vagrant plugin list | grep $name" 1 "Plugin uninstalled successfully"
+    # we need one parameter with name + optional '--force'
+    [ $# -ne 1 -a $# -ne 2 -a "$2" == "--force" ] && { rlFail 'Wrong usage'; return 1; }
+    if [ "$2" == "--force" -o "$vagrant_SHARING" == "false" ];then
+        # uninstall plugin first if needed
+        if `vagrant plugin list | grep -q $1`;then
+            vagrantPluginUninstall $1
+        fi
     fi
 
-    # install itself 
-    rlRun "vagrant plugin install $1"
+    # install itself
+    if [ "$vagrant_PLUGINS_DIR" != "" ]; then
+        rlRun "vagrant plugin install $vagrant_PLUGINS_DIR/${1}*.gem"
+    else
+        rlRun "vagrant plugin install $1"
+    fi
 
+    rlLogInfo "Plugin `vagrant plugin list | grep $1` installed"
     # final check
-    rlRun "vagrant plugin list | grep $name"
+    vagrant plugin list | grep $1
 
     return $?
 }
@@ -272,9 +315,9 @@ vagrantPluginUninstall() {
     [ $# -ne 1 ] && { rlFail 'Wrong usage'; return 1; };
 
     # uninstall 
-    if $(vagrant plugin list | grep $1); then
+    if `vagrant plugin list | grep -q $1`; then
         rlRun "vagrant plugin uninstall $1"
-        rlRun "vagrant plugin list | grep $1" 1 "Plugin uninstalled successfully"
+        vagrant plugin list | grep $1 && rlFail "Plugin uninstall failed"
         [ $? -ne 1 ] && return 1
     else
         rlLogDebug "Plugin not installed"

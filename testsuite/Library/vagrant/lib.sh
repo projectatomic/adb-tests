@@ -273,11 +273,16 @@ vagrantPluginInstall() {
         fi
     fi
 
-    # install itself
-    if [ "$vagrant_PLUGINS_DIR" != "" ]; then
-        rlRun "vagrant plugin install $vagrant_PLUGINS_DIR/${1}*.gem"
+    # skip if sharing enabled and plutin already installed
+    if [ "$vagrant_SHARING" == "true" ] && vagrant plugin list | grep -q vagrant-adbinfo; then
+        rlLog "Plugin $1 already installed, installation skipped."
     else
-        rlRun "vagrant plugin install $1"
+        # install itself
+        if [ "$vagrant_PLUGINS_DIR" != "" ]; then
+            rlRun "vagrant plugin install $vagrant_PLUGINS_DIR/${1}*.gem"
+        else
+            rlRun "vagrant plugin install $1"
+        fi
     fi
 
     rlLogInfo "Plugin `vagrant plugin list | grep $1` installed"

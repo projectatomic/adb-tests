@@ -40,6 +40,7 @@ rlJournalStart
         rlImport 'testsuite/vagrant'
         vagrantBoxIsProvided || rlDie
         vagrantBoxAdd || rlDie
+        vagrantPluginInstall vagrant-registration
         rlRun "TmpDir=\$(mktemp -d)" 0 "Creating tmp directory"
         rlRun "pushd $TmpDir"
         rlRun "vagrant init $vagrant_BOX_NAME"
@@ -77,7 +78,7 @@ if vagrantRegistrationCredentialsProvided;then
 fi
 
     rlPhaseStartCleanup
-        vagrantBoxRemove
+        #vagrantBoxRemove # can be shared, so skipping
         rlRun "rm -f Vagrantfile"
         rlRun "rm -f ~/.vagrant.d/Vagrantfile"
         rlRun "popd"

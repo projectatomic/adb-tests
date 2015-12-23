@@ -35,6 +35,7 @@ rlJournalStart
         rlImport 'testsuite/vagrant'
         rlRun "TmpDir=\$(mktemp -d)" 0 "Creating tmp directory"
         rlRun "pushd $TmpDir"
+        vagrantPluginInstall vagrant-adbinfo
         # configure general Vagrantfile,
         #   mainly for cygwin workaround for windows
         vagrantConfigureGeneralVagrantfile "skip"

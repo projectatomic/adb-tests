@@ -78,8 +78,8 @@ if vagrantRegistrationCredentialsProvided;then
 fi
 
     rlPhaseStartCleanup
+        rlRun "vagrant destroy --force"
         #vagrantBoxRemove # can be shared, so skipping
-        rlRun "rm -f Vagrantfile"
         rlRun "rm -f ~/.vagrant.d/Vagrantfile"
         rlRun "popd"
         rlRun "rm -r $TmpDir" 0 "Removing tmp directory"

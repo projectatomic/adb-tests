@@ -265,7 +265,7 @@ Returns 0 when the plugin is successfully installed, non-zero otherwise.
 
 vagrantPluginInstall() {
     # we need one parameter with name + optional '--force'
-    [ $# -ne 1 -a $# -ne 2 -a "$2" == "--force" ] && { rlFail 'Wrong usage'; return 1; }
+    [ $# -eq 1 ] || [ $# -eq 2 -a "$2" == "--force" ] || { rlFail 'Wrong usage'; return 1; }
     if [ "$2" == "--force" -o "$vagrant_SHARING" == "false" ];then
         # uninstall plugin first if needed
         if `vagrant plugin list | grep -q $1`;then
@@ -273,8 +273,8 @@ vagrantPluginInstall() {
         fi
     fi
 
-    # skip if sharing enabled and plutin already installed
-    if [ "$vagrant_SHARING" == "true" ] && vagrant plugin list | grep -q vagrant-adbinfo; then
+    # skip if sharing enabled and plugin already installed
+    if [ "$vagrant_SHARING" == "true" ] && vagrant plugin list | grep -q $1; then
         rlLog "Plugin $1 already installed, installation skipped."
     else
         # install itself
@@ -287,7 +287,7 @@ vagrantPluginInstall() {
 
     rlLogInfo "Plugin `vagrant plugin list | grep $1` installed"
     # final check
-    vagrant plugin list | grep $1
+    vagrant plugin list | grep -q $1
 
     return $?
 }
@@ -400,29 +400,37 @@ vagrantConfigureGeneralVagrantfile () {
         # workaround for windows host
         generalVagrantfile="c:\\Users\\$LOGNAME\\.vagrant.d\\Vagrantfile"
         generalVagrantfile="/cygdrive/c/Users/$USER/.vagrant.d/Vagrantfile"
-        rm -f $reneralVagrantfile
+        rm -f $generalVagrantfile
         echo 'ENV["VAGRANT_DETECTED_OS"] = ENV["VAGRANT_DETECTED_OS"].to_s + " cygwin"' >> $generalVagrantfile
     else
-        rm -f $reneralVagrantfile
+        rm -f $generalVagrantfile
     fi
-    echo "Vagrant.configure('2') do |config|" > $generalVagrantfile
-    # TODO: add WIN workaround if needed -> how to know test is running on windows?
-    case $1 in
-        skip)
-            echo "config.registration.skip = true" >> $generalVagrantfile
-            ;;
-        file)
-            echo "config.registration.username = '$vagrant_RHN_USERNAME'" >> $generalVagrantfile
-            echo "config.registration.password = '$vagrant_RHN_PASSWORD'" >> $generalVagrantfile
-            ;;
-        env)
-            echo "config.registration.username = ENV['USERNAME']" >> $generalVagrantfile
-            echo "config.registration.password = ENV['PASSWORD']" >> $generalVagrantfile
-            ;;
-        *)
-            echo "ERROR: unexpected argument '$1' for function registration_plugin_configure"
-            ;;
-    esac
+    vagrant plugin list
+    vagrant plugin list | grep registration
+    if vagrant plugin list | grep -q registration; then
+        HAS_REG_PLUGIN=true
+    else
+        HAS_REG_PLUGIN=false
+    fi
+    echo "Vagrant.configure('2') do |config|" >> $generalVagrantfile
+    if $HAS_REG_PLUGIN;then
+        case $1 in
+            skip)
+                echo "config.registration.skip = true" >> $generalVagrantfile
+                ;;
+            file)
+                echo "config.registration.username = '$vagrant_RHN_USERNAME'" >> $generalVagrantfile
+                echo "config.registration.password = '$vagrant_RHN_PASSWORD'" >> $generalVagrantfile
+                ;;
+            env)
+                echo "config.registration.username = ENV['USERNAME']" >> $generalVagrantfile
+                echo "config.registration.password = ENV['PASSWORD']" >> $generalVagrantfile
+                ;;
+            *)
+                echo "ERROR: unexpected argument '$1' for function registration_plugin_configure"
+                ;;
+        esac
+    fi
     echo "end" >> $generalVagrantfile
     return
 }

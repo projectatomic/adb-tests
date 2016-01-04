@@ -35,6 +35,7 @@ rlJournalStart
         rlImport 'testsuite/vagrant'
         rlRun "TmpDir=\$(mktemp -d)" 0 "Creating tmp directory"
         rlRun "pushd $TmpDir"
+        vagrantBoxAdd || rlDie
         vagrantPluginInstall vagrant-adbinfo
         vagrantConfigureGeneralVagrantfile "skip"
     rlPhaseEnd
@@ -47,7 +48,8 @@ rlJournalStart
     rlPhaseStartTest with_running_vm
         rlRun "vagrant init $vagrant_BOX_NAME"
         rlRun "vagrant up --provider $vagrant_PROVIDER"
-        rlRun "vagrant adbinfo > output 2> errors"
+        #rlRun "vagrant adbinfo > output 2> errors"
+        rlRun "echo 'y' | vagrant adbinfo > output 2> errors"
         echo -e "stdout:\n========"
         cat output
         echo -e "stderr:\n========"
@@ -55,10 +57,10 @@ rlJournalStart
         echo "========"
         # check output
         rlRun "grep '.' errors" 1 "There should be nothing on stderr"
-        rlAssertGrep "DOCKER_HOST=tcp://[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*:[0-9]*" output
-        rlAssertGrep "DOCKER_CERT_PATH=.*.docker" output
-        rlAssertGrep "DOCKER_TLS_VERIFY=1" output
-        rlAssertGrep "DOCKER_MACHINE_NAME=[0-9a-f]*" output
+        rlAssertGrep "export DOCKER_HOST=tcp://[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*:[0-9]*" output
+        rlAssertGrep "export DOCKER_CERT_PATH=.*\.docker" output
+        rlAssertGrep "export DOCKER_TLS_VERIFY=1" output
+        rlAssertGrep "export DOCKER_MACHINE_NAME=[0-9a-f]*" output
         rlAssertGrep 'eval "$(vagrant adbinfo)' output
         rlAssertNotGrep 'error\|fail' output -i
     rlPhaseEnd

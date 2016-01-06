@@ -5,6 +5,11 @@ LINK="https://github.com/projectatomic/atomic/archive/v1.5.tar.gz"
 # Install according to github docs 
 # https://github.com/projectatomic/atomic/tree/master/docs/install
 install_atomic() {
+  echo "
+  ##########
+  INSTALLING ATOMIC CLI
+  ##########
+  "
   wget $LINK -O atomic.tar.gz
   tar -xvf atomic.tar.gz
   cd atomic-$RELEASE

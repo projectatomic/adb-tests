@@ -4,6 +4,11 @@
 LINK="https://github.com/projectatomic/atomicapp"
 
 install_atomicapp() {
+  echo "
+  ##########
+  INSTALLING ATOMICAPP CLI
+  ##########
+  "
   git clone $LINK
   cd atomicapp
   make install
@@ -13,6 +18,12 @@ install_atomicapp() {
 
 # Builds the atomicapp image as atomicapp:build
 docker_atomicapp() {
+  echo "
+  ##########
+  BUILDING ATOMICAPP CONTAINER
+  ##########
+  "
+	docker pull centos:7
   git clone $LINK
   cd atomicapp
   docker build -t atomicapp:build .

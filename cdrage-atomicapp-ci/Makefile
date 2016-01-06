@@ -3,99 +3,75 @@ ACTION := "run"
 
 define WORDPRESS_ANSWERS
 
-[mariadb-atomicapp]
-	db_user = foo
-	db_pass = foo
-	db_name = foo
-
-[wordpress]
-	db_user = foo
-	db_pass = foo
-	db_name = foo
 
 endef
 export WORDPRESS_ANSWERS
 
-container:
-	# Pull the latest CentOS image
-	docker pull centos:7
-
-	# Builds the atomicapp image as atomicapp:build
-	./atomicapp.sh docker
 
 provider:
-	./providers/$(PROVIDER).sh $(ACTION)
 
+# Replace each example with "atomicapp:build"
 library: 
 	git clone https://github.com/projectatomic/nulecule-library
-
-	# Replace each example with "atomicapp:build"
 	find . -type f -iname 'Dockerfile' -exec sed -i 's/^FROM.*/FROM atomicapp:build/' "{}" +;
 
-install: container library
+install: library
 	./atomic.sh install
 	./atomicapp.sh install
+	./atomicapp.sh docker
 
 clean:
 	rm -rf build answers.conf
 
 clean-all:
 	rm -rf build answers.conf nulecule-library
-
-test-helloapache:
-	mkdir build
-	cd nulecule-library/helloapache && docker build -t projectatomic/helloapache .
-	atomic $(ACTION) projectatomic/helloapache --provider=$(PROVIDER) -a answers.conf --destination=build
-
-# We build mariadb as wordpress uses an aggregated database of mariadb
-test-wordpress: 
-	mkdir build
-	cd nulecule-library/mariadb-centos7-atomicapp && docker build -t projectatomic/mariadb-centos7-atomicapp .
-	cd nulecule-library/wordpress-centos7-atomicapp && docker build -t projectatomic/wordpress-centos7-atomicapp .
-	echo "$$WORDPRESS_ANSWERS" >> answers.conf
-	atomic $(ACTION) projectatomic/wordpress-centos7-atomicapp --provider=$(PROVIDER) -a answers.conf --destination=build
+	./providers/docker.sh stop || true
+	./providers/kubernetes.sh stop || true
+	./providers/openshift.sh stop || true
 
 stop: 
 	cd build && atomicapp stop . # temp fix until atomic cli stop works
 
 docker:
 	# Test Docker first
-	make provider PROVIDER=docker ACTION=answers 
-	make test-helloapache
+	./providers/docker.sh answers
+	./helloapache.sh docker
 	make stop
 	make clean
 
-	make provider PROVIDER=docker ACTION=answers 
-	make test-wordpress
+	./providers/docker.sh answers
+	./wordpress.sh docker
 	make stop
 	make clean
+
+	./providers/docker.sh stop
 
 openshift:
 	# Start it! (delay needed to init http front-end)
-	make provider PROVIDER=openshift ACTION=start
-	sleep 15
+	./providers/openshift.sh start 
 
-	make provider PROVIDER=openshift ACTION=answers
-	make test-wordpress PROVIDER=openshift
+	./providers/openshift.sh answers
+	./wordpress.sh openshift
 	make stop
 	make clean
 
-	make provider PROVIDER=openshift ACTION=stop
+	./providers/openshift.sh stop
 
 kubernetes:
 	# Start it! (delay needed to init http front-end)
-	make provider PROVIDER=kubernetes ACTION=start
-	sleep 15
+	./providers/kubernetes.sh start 
 
-	make provider PROVIDER=kubernetes ACTION=answers 
-	make test-helloapache PROVIDER=kubernetes
+	./providers/kubernetes.sh answers
+	./helloapache.sh kubernetes
 	make stop
 	make clean
 
-	make provider PROVIDER=kubernetes ACTION=answers
-	make test-wordpress PROVIDER=kubernetes
+	./providers/kubernetes.sh answers
+	./wordpress.sh kubernetes
 	make stop
 	make clean
+
+	./providers/kubernetes.sh stop
 
 # the whole shebang
 all: clean-all install

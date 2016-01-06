@@ -16,13 +16,13 @@ install_atomic() {
   if [ -f /etc/redhat-release ]; then
     yum install -y epel-release python-pip pylint go-md2man
     pip install -r requirements.txt
-    make install
+    PYLINT=true make install # ignore pesky pylint
   else # assuming this is debian/ubuntu instead :)
     apt-get install -y make git python-selinux go-md2man python-pip
     pip install pylint
     ln /usr/local/bin/pylint /usr/bin/pylint
     pip install -r requirements.txt
-    PYLINT=true make install
+    PYLINT=true make install # ignore pesky pylint
   fi
   cd ..
   rm -rf atomic-$RELEASE atomic.tar.gz

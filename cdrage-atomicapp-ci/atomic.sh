@@ -14,11 +14,11 @@ install_atomic() {
   tar -xvf atomic.tar.gz
   cd atomic-$RELEASE
   if [ -f /etc/redhat-release ]; then
-    yum-builddep -y atomic
-    make all
+    yum install -y epel-release python-pip pylint go-md2man
+    pip install -r requirements.txt
     make install
   else # assuming this is debian/ubuntu instead :)
-    apt-get install python-selinux go-md2man
+    apt-get install -y make git python-selinux go-md2man python-pip
     pip install pylint
     ln /usr/local/bin/pylint /usr/bin/pylint
     pip install -r requirements.txt

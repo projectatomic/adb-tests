@@ -12,20 +12,19 @@ install_atomic() {
   INSTALLING ATOMIC CLI
   ##########
   "
-  # Remove all previous builds of atomic (issue of upgrading 1.5 to 1.8)
-  rm -rf /usr/lib/python2.7/site-packages/Atomic/ /usr/lib/python2.7/site-packages/atomic-*
   wget $LINK -O atomic.tar.gz
   tar -xvf atomic.tar.gz
   cd atomic-$RELEASE
   
   # Use rhel yum, if not assume it's ubuntu / debian
   if [ -f /etc/redhat-release ]; then
+    # Remove all previous builds of atomic (issue of upgrading 1.5 to 1.8)
+    rm -rf /usr/lib/python2.7/site-packages/Atomic/ /usr/lib/python2.7/site-packages/atomic-*
     yum install -y epel-release python-pip pylint go-md2man
   else
-    apt-get install -y make git python-selinux go-md2man python-pip
-
-    # Pylint debian complainy stuff
-    pip install pylint
+    rm -rf /usr/local/lib/python2.7/site-packages/Atomic/ /usr/local/lib/python2.7/site-packages/atomic-*
+    rm -rf /usr/local/lib/python2.7/dist-packages/Atomic/ /usr/local/lib/python2.7/dist-packages/atomic-*
+    apt-get install -y make git python-selinux go-md2man python-pip python-dbus python-rpm python-pylint
     ln /usr/local/bin/pylint /usr/bin/pylint
   fi
  

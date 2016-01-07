@@ -31,3 +31,6 @@ NAME        LABELS                             STATUS
 ####We should be able to run helloapache atomicapp 
 *This testcase will change after next ADB release*
 * Refer https://hub.docker.com/r/projectatomic/helloapache/
+
+####To test vagrant sanity (up/destroy)
+* Execute vagrant_run script (Use -h option to check available options)

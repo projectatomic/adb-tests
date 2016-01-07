@@ -25,8 +25,9 @@ docker build -t projectatomic/mariadb-centos7-atomicapp \
   -f nulecule-library/mariadb-centos7-atomicapp/Dockerfile \
   nulecule-library/mariadb-centos7-atomicapp/
 
-docker build -t projectatomic/wordpress-centos7-atomicapp \
+# Using name "wordpress" as temp fix due to https://github.com/projectatomic/atomic/issues/271
+docker build -t projectatomic/wordpress \
   -f nulecule-library/wordpress-centos7-atomicapp/Dockerfile \
   nulecule-library/wordpress-centos7-atomicapp/
 
-atomic run projectatomic/wordpress-centos7-atomicapp --provider=$1 -a answers.conf --destination=build
+atomic run projectatomic/wordpress --provider=$1 -a answers.conf --destination=build

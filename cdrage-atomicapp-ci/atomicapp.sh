@@ -28,6 +28,10 @@ install_atomicapp() {
       curl -s "https://patch-diff.githubusercontent.com/raw/${UPSTREAM}/pull/${1}.patch" | git am
   fi
 
+  # Test first :)
+  make test
+
+  # Install
   make install
 
   # Build docker container

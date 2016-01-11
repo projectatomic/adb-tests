@@ -1,15 +1,6 @@
 PROVIDER := "docker"
 ACTION := "run"
 
-define WORDPRESS_ANSWERS
-
-
-endef
-export WORDPRESS_ANSWERS
-
-
-provider:
-
 # Replace each example with "atomicapp:build"
 library: 
 	git clone https://github.com/projectatomic/nulecule-library
@@ -17,7 +8,7 @@ library:
 
 install: library
 	./atomic.sh install
-	./atomicapp.sh install
+	./atomicapp.sh install $(ATOMICAPP_PR)
 	./atomicapp.sh docker
 
 clean:

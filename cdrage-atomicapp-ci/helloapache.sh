@@ -4,10 +4,21 @@ echo "
 $1: TESTING HELLOAPACHE EXAMPLE
 ##########
 "
-mkdir build
 
 docker build -t projectatomic/helloapache \
   -f nulecule-library/helloapache/Dockerfile \
+  --no-cache \
   nulecule-library/helloapache
 
-atomic run projectatomic/helloapache --provider=$1 -a answers.conf --destination=build
+case "$1" in
+        run)
+            mkdir build
+            atomic run projectatomic/helloapache --provider=$2 -a answers.conf --destination=build
+            ;;
+        stop)
+            atomic stop projectatomic/helloapache --provider=$2 build/
+            ;;
+        *)
+            echo $"Usage: helloapache.sh {run|stop}"
+            exit 1
+esac

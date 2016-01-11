@@ -9,7 +9,6 @@ library:
 install: library
 	./atomic.sh install
 	./atomicapp.sh install $(ATOMICAPP_PR)
-	./atomicapp.sh docker
 
 clean:
 	rm -rf build answers.conf
@@ -20,19 +19,15 @@ clean-all:
 	./providers/kubernetes.sh stop || true
 	./providers/openshift.sh stop || true
 
-stop: 
-	cd build && atomicapp stop . # temp fix until atomic cli stop works
-
 docker:
-	# Test Docker first
 	./providers/docker.sh answers
-	./helloapache.sh docker
-	make stop
+	./helloapache.sh run docker
+	./helloapache.sh stop docker
 	make clean
 
 	./providers/docker.sh answers
-	./wordpress.sh docker
-	make stop
+	./wordpress.sh run docker
+	./wordpress.sh stop docker
 	make clean
 
 	./providers/docker.sh stop
@@ -42,8 +37,8 @@ openshift:
 	./providers/openshift.sh start 
 
 	./providers/openshift.sh answers
-	./wordpress.sh openshift
-	make stop
+	./wordpress.sh run openshift
+	./wordpress.sh stop openshift
 	make clean
 
 	./providers/openshift.sh stop
@@ -53,13 +48,13 @@ kubernetes:
 	./providers/kubernetes.sh start 
 
 	./providers/kubernetes.sh answers
-	./helloapache.sh kubernetes
-	make stop
+	./helloapache.sh run kubernetes
+	./helloapache.sh stop kubernetes
 	make clean
 
 	./providers/kubernetes.sh answers
-	./wordpress.sh kubernetes
-	make stop
+	./wordpress.sh run kubernetes
+	./wordpress.sh stop kubernetes
 	make clean
 
 	./providers/kubernetes.sh stop

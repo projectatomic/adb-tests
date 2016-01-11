@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# TO CHANGE, temporary:
 LINK="https://github.com/projectatomic/atomicapp"
 UPSTREAM="projectatomic/atomicapp"
 
@@ -8,6 +7,10 @@ install_atomicapp() {
   echo "
   ##########
   INSTALLING ATOMICAPP CLI
+  
+  This will install atomicapp to /bin
+  as well as build an atomicapp container named
+  atomicapp:build
   ##########
   "
   git clone $LINK
@@ -26,21 +29,11 @@ install_atomicapp() {
   fi
 
   make install
-  cd ..
-  rm -rf atomicapp
-}
 
-# Builds the atomicapp image as atomicapp:build
-docker_atomicapp() {
-  echo "
-  ##########
-  BUILDING ATOMICAPP CONTAINER
-  ##########
-  "
+  # Build docker container
 	docker pull centos:7
-  git clone $LINK
-  cd atomicapp
   docker build -t atomicapp:build .
+
   cd ..
   rm -rf atomicapp
 }
@@ -49,11 +42,7 @@ case "$1" in
         install)
             install_atomicapp $2
             ;;
-        docker)
-            docker_atomicapp
-            ;;
         *)
-            echo $"Usage: atomicpp.sh {install|docker}"
+            echo $"Usage: atomicpp.sh {install}"
             exit 1
- 
 esac

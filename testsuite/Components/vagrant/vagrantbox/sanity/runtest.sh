@@ -43,9 +43,9 @@ rlJournalStart
 
   for d in $TmpDir $vagrant_VAGRANTFILE_DIRS; do
         if [ "$d" == "$TmpDir" ]; then
-            rlPhaseStartTest "testing new Vagrantfiles"
+            rlPhaseStartTest "testing new Vagrantfile"
         else
-            rlPhaseStartTest "testing Vangrantfiles from `basename $d` directory"
+            rlPhaseStartTest "testing Vangrantfile from `basename $d` directory"
         fi
         if ! test -f $d/Vagrantfile ; then
             rlFail "$d/Vagrantfile doesn't exist"

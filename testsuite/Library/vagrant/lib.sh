@@ -125,6 +125,16 @@ If not provided, plugins are installed directly from upstream.
 
 =over
 
+=item vagrant_VAGRANTFILE_DIRS
+
+List of dirrectories with Vagrantfiles to test.
+By default, new Vagrantfile is created,
+but some test may want to test something over multiple prepared Vagrantfiles.
+
+=back
+
+=over
+
 =item vagrant_RHN_USERNAME
 
 Username for registration plugin.

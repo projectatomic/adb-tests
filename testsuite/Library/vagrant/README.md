@@ -42,6 +42,12 @@ and also other variables where you can find results of called functions.
     Path to directory with vagrant plugins (\*.gem) to install from.
     If not provided, plugins are installed directly from upstream.
 
+- vagrant\_VAGRANTFILE\_DIRS
+
+    List of dirrectories with Vagrantfiles to test.
+    By default, new Vagrantfile is created,
+    but some test may want to test something over multiple prepared Vagrantfiles.
+
 - vagrant\_RHN\_USERNAME
 
     Username for registration plugin.

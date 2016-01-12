@@ -39,6 +39,6 @@ case "$1" in
             docker rm -f mariadb-atomicapp-app wordpress-atomicapp || true
             ;;
         *)
-            echo $"Usage: helloapache.sh {run|stop}"
+            echo $"Usage: wordpress.sh {run|stop}"
             exit 1
 esac

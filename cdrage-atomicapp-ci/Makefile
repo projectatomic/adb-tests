@@ -31,6 +31,7 @@ docker:
 	make clean
 
 	./providers/docker.sh stop
+	make clean-all
 
 openshift:
 	# Start it! (delay needed to init http front-end)
@@ -41,7 +42,13 @@ openshift:
 	./wordpress.sh stop openshift
 	make clean
 
+	./providers/openshift.sh answers
+	./etherpad.sh run openshift
+	./etherpad.sh stop openshift
+	make clean
+
 	./providers/openshift.sh stop
+	make clean-all
 
 kubernetes:
 	# Start it! (delay needed to init http front-end)
@@ -58,6 +65,7 @@ kubernetes:
 	make clean
 
 	./providers/kubernetes.sh stop
+	make clean-all
 
 # the whole shebang
 all: clean-all install

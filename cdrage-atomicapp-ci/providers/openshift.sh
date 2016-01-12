@@ -47,7 +47,8 @@ answers_openshift() {
   provider = openshift
   providerapi = https://localhost:8443
   accesstoken = $API_KEY 
-  namespace = foo" > answers.conf
+  namespace = foo
+  providertlsverify = False" > answers.conf
 
   echo "OpenShift Origin answers file located at $PWD"
 }

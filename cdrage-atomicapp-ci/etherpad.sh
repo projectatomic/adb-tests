@@ -30,7 +30,7 @@ case "$1" in
             atomic stop etherpad --provider=$2 build/
 
             # Since the names are hard-coded
-            docker rm -f mariadb-atomicapp-app etherpad-atomicapp || true
+            docker rm -f mariadb-atomicapp-app etherpad-atomicapp etherpad || true
             ;;
         *)
             echo $"Usage: etherpad.sh {run|stop}"

@@ -25,6 +25,10 @@ stop_openshift() {
   ##########
   "
   docker rm -f origin
+
+  # Remove underlying kubernetes containers created as result of using OpenShift with k8s as back-end
+   docker ps -a | grep 'gcr.io/google_containers' | awk '{print $1}' | xargs --no-run-if-empty docker rm -f || true
+   docker ps -a | grep 'k8s_' | awk '{print $1}' | xargs --no-run-if-empty docker rm -f || true
 }
 
 answers_openshift() {

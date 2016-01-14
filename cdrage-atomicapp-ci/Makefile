@@ -64,6 +64,11 @@ kubernetes:
 	./wordpress.sh stop kubernetes
 	make clean
 
+	./providers/kubernetes.sh answers
+	./etherpad.sh run kubernetes
+	./etherpad.sh stop kubernetes
+	make clean
+
 	./providers/kubernetes.sh stop
 	make clean-all
 

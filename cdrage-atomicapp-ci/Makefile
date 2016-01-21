@@ -1,14 +1,14 @@
 PROVIDER := "docker"
 ACTION := "run"
 
-# Replace each example with "atomicapp:build"
-library: 
-	git clone https://github.com/projectatomic/nulecule-library
-	find . -type f -iname 'Dockerfile' -exec sed -i 's/^FROM.*/FROM atomicapp:build/' "{}" +;
-
-install: library
+install:
+	# Install Atomic CLI and Atomic App CLI
 	./atomic.sh install
 	./atomicapp.sh install $(ATOMICAPP_PR)
+
+	# Download the library as well
+	git clone https://github.com/projectatomic/nulecule-library
+	find . -type f -iname 'Dockerfile' -exec sed -i 's/^FROM.*/FROM atomicapp:build/' "{}" +;
 
 clean:
 	rm -rf build answers.conf
@@ -31,7 +31,6 @@ docker:
 	make clean
 
 	./providers/docker.sh stop
-	make clean-all
 
 openshift:
 	# Start it! (delay needed to init http front-end)
@@ -48,7 +47,6 @@ openshift:
 	make clean
 
 	./providers/openshift.sh stop
-	make clean-all
 
 kubernetes:
 	# Start it! (delay needed to init http front-end)
@@ -70,10 +68,7 @@ kubernetes:
 	make clean
 
 	./providers/kubernetes.sh stop
-	make clean-all
 
 # the whole shebang
 all: clean-all install
-	make docker
-	make openshift
-	make kubernetes
+	make docker openshift kubernetes clean-all

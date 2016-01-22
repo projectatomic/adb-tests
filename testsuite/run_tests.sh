@@ -37,7 +37,12 @@ run_tests () {
         mkdir -p $logdir
         stdout=$logdir/stdout
         stderr=$logdir/stderr
-        vagrant_PLUGINS_DIR=$1 ./runtest.sh > $stdout 2> $stderr
+        if [ "$HOST_PLATFORM" == "lin" ];then
+            SCL="scl enable sclo-vagrant1 --"
+        else
+            SCL=""
+        fi
+        vagrant_PLUGINS_DIR=$1 $SCL ./runtest.sh > $stdout 2> $stderr
         grep -q 'Phases: .* good, 0 bad' $stdout
         if [ $? == 0 ]; then
             echo -e "PASS\t$d"
@@ -72,7 +77,7 @@ echo "logdir with upstream plugins: $logroot" >> $TSlog
 run_tests ""
 
 # don't have local plugins, exit
-[ "$vagrant_PLUGINS_DIR" == "" -o -d "$vagrant_PLUGINS_DIR" ] || exit
+[ "$vagrant_PLUGINS_DIR" == "" -o -d "$vagrant_PLUGINS_DIR" ] && exit
 
 #########################
 # test with local plugins

@@ -66,12 +66,17 @@ rlJournalStart
         rlRun "vagrant up --provider $vagrant_PROVIDER"
         for i in `seq 1 $TEST_COUNT`; do
             rlLogInfo "Testing repeating vagrant suspend/resume: round $i / $TEST_COUNT"
-            vagrant suspend || rlFail "vagrant suspend failed"
+            vagrant suspend
+            if [ $? != 0 ]; then
+                rlFail "vagrant suspend failed"
+                rlRun "vagrant up --provider $vagrant_PROVIDER"
+                continue
+            fi
             vagrant ssh -c 'echo hello' | grep hello && rlFail "vagrant box shouldn't responde now"
             vagrant resume || rlFail "vagrant resume failed"
             vagrant ssh -c 'echo hello' | grep hello || rlFail "vagrant ssh failed"
         done
-        vagrant halt
+        vagrant destroy --force || rlFail "vagrant destroy failed"
 
         for i in `seq 1 $TEST_COUNT`; do
             rlLogInfo "Testing repeating vagrant up/destroy: round $i / $TEST_COUNT"

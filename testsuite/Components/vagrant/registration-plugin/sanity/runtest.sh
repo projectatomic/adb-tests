@@ -34,6 +34,50 @@
 # and these variables are needed for test box registration
 #    vagrant_RHN_USERNAME ... username for registration
 #    vagrant_RHN_PASSWORD ... password for registration
+#    vagrant_RHN_SERVER_URL ... server for registration
+
+vagrant_RHN_SERVICE_URL="https://$vagrant_RHN_SERVER_URL/subscription"
+
+set -o pipefail
+
+# get identity and status (from inside vagrant box)
+# $1 - prefix to store these info
+get_subscription_id() {
+    rlLog "Getting subscription id ($1)"
+    rlRun "vagrant ssh -c 'subscription-manager identity' > $1-identity.txt"
+    rlRun "vagrant ssh -c 'subscription-manager status' > $1-status.txt"
+    rlRun "vagrant ssh -c 'subscription-manager list --consumed' > $1-list-consumed.txt"
+    rlRun "vagrant ssh -c 'subscription-manager facts' > $1-facts.txt"
+
+    # parse identity
+    CONSUMER_UUID=$(cat identity.txt | grep -i identity | sed 's/.*: *\(.*\)/\1/')
+    rlLog "CONSUMER_UUID=$CONSUMER_UUID"
+}
+
+# get consumer info and entitlements (from host, not vagrant box)
+# $1 - prefix to store these info
+get_subscription_info() {
+    test -z $CONSUMER_UUID && { rlFail "Getting subscription info: CONSUMER_UUID not known!"; return; }
+    rlLog "Getting subscription info ($1, $CONSUMER_UUID)"
+    # get consumer subscription info
+    rlRun "curl -k -u $vagrant_RHN_USERNAME:$vagrant_RHN_PASSWORD $vagrant_RHN_SERVICE_URL/consumers/$CONSUMER_UUID | python -mjson.tool > $1-consumer.txt"
+    # get entitlement info
+    rlRun "curl -k -u $vagrant_RHN_USERNAME:$vagrant_RHN_PASSWORD $vagrant_RHN_SERVICE_URL/consumers/$CONSUMER_UUID/entitlements | python -mjson.tool > $1-entitlements.txt"
+}
+
+# check that SKU in facts and one actually consumed matches
+# $1 - facts file name
+# $2 - consumed file name
+# $3 - entitlement file name
+check_sku() {
+    FACTS_SKU=$(cat $1 | grep dev_sku | sed 's/.*: *//')
+    rlLog "Facts SKU:    '$FACTS_SKU'"
+    CONSUMED_SKU=$(cat $2 | grep SKU | sed 's/.*: *//')
+    rlLog "Consumed SKU: '$CONSUMED_SKU'"
+    rlRun "test '_$FACTS_SKU' = '_$CONSUMED_SKU'"
+    rlAssertEquals "Exactly one developmentPool in entitlements." $(grep developmentPool $3 | wc -l) 1
+    rlRun "grep 'developmentPool.*true' $3"
+}
 
 rlJournalStart
     rlPhaseStartSetup
@@ -53,14 +97,61 @@ rlJournalStart
         rlRun "vagrant halt"
     rlPhaseEnd
 
+# rest of test phases needs credentials
 if vagrantRegistrationCredentialsProvided;then
+
+    rlPhaseStartTest manual_registration
+        # note: running the box still without registration via plugin (skip in general vagrant file)
+        rlRun "vagrant up"
+        rlRun "vagrant ssh -c 'time subscription-manager register --username $vagrant_RHN_USERNAME --password $vagrant_RHN_PASSWORD --serverurl $vagrant_RHN_SERVER_URL --auto-attach' > register.txt"
+        get_subscription_id   'manual'
+        get_subscription_info 'manual'
+
+        check_sku "manual-facts.txt" "manual-list-consumed.txt" "manual-entitlements.txt"
+
+        rlRun "vagrant ssh -c 'time subscription-manager remove --all'"
+        get_subscription_info 'manual-removed'
+        rlRun "grep '\[\]' manual-removed-entitlements.txt"
+        rlAssertEquals "No entitlements after 'remove --all'" $(cat manual-removed-entitlements.txt | wc -l) 1
+
+        rlRun "vagrant ssh -c 'time subscription-manager unregister"
+        get_subscription_id   'manual-unregistered'
+        get_subscription_info 'manual-unregistered'
+        rlRun "cat manual-unregistered-status.txt"
+
+        rlRun "vagrant halt"
+    rlPhaseEnd
+
+    rlPhaseStartTest plugin_registration
+        vagrantConfigureGeneralVagrantfile "file"
+        rlRun "vagrant up --provider $vagrant_PROVIDER"
+        get_subscription_id   'plugin'
+        get_subscription_info 'plugin'
+
+        check_sku "plugin-facts.txt" "plugin-list-consumed.txt" "plugin-entitlements.txt"
+
+        rlRun "vagrant halt"
+        get_subscription_info 'plugin-halted'
+        rlRun "grep '\[\]' plugin-halted-entitlements.txt"
+        rlAssertEquals "No entitlements after halt'" $(cat plugin-halted-entitlements.txt | wc -l) 1
+        rlRun "cat plugin-halted-consumer.txt"
+        rlRun "cat plugin-halted-entitlements.txt"
+
+        rlRun "vagrant destroy"
+        get_subscription_info 'plugin-destroyed'
+        rlRun "grep '\[\]' plugin-destroyed-entitlements.txt"
+        rlAssertEquals "No entitlements after halt'" $(cat plugin-destroyed-entitlements.txt | wc -l) 1
+        rlRun "cat plugin-destroyed-consumer.txt"
+        rlRun "cat plugin-destroyed-entitlements.txt"
+    rlPhaseEnd
+
     rlPhaseStartTest credentials_in_vagrantfile
         vagrantConfigureGeneralVagrantfile "file"
         rlRun "vagrant up --provider $vagrant_PROVIDER"
         rlRun "vagrant ssh -c 'echo hello' | grep hello"
         rlRun "vagrant ssh -c 'sudo subscription-manager status'"
         rlRun "vagrant ssh -c \"sudo sed -i 's/gpgcheck = [01]/gpgcheck = 0\nskip_if_unavailable=True/' /etc/yum.repos.d/redhat.repo\""  # workaround for sjis repo
-        rlRun "vagrant ssh -c 'sudo yum install -y vim && sudo yum remove -y vim'"
+        rlRun "vagrant ssh -c 'sudo yum install -y nano && sudo yum remove -y nano'"
         rlRun "vagrant halt"
     rlPhaseEnd
 
@@ -72,7 +163,7 @@ if vagrantRegistrationCredentialsProvided;then
         rlRun "vagrant ssh -c 'echo hello' | grep hello"
         rlRun "vagrant ssh -c 'sudo subscription-manager status'"
         rlRun "vagrant ssh -c \"sudo sed -i 's/gpgcheck = [01]/gpgcheck = 0\nskip_if_unavailable=True/' /etc/yum.repos.d/redhat.repo\""  # workaround for sjis repo
-        rlRun "vagrant ssh -c 'sudo yum install -y vim && sudo yum remove -y vim'"
+        rlRun "vagrant ssh -c 'sudo yum install -y nano && sudo yum remove -y nano'"
         rlRun "vagrant halt"
     rlPhaseEnd
 fi

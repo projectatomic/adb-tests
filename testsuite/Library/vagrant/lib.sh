@@ -347,7 +347,7 @@ true <<'=cut'
 
 =head2 vagrantRegistrationCredentialsProvided
 
-Check if file with vagrant box is provided in variables vagrant_RHN_USERNAME and vagrant_RHN_PASSWORD
+Check if registration credentials are provided in variables vagrant_RHN_USERNAME and vagrant_RHN_PASSWORD
 
     vagrantRegistrationCredentialsProvided
 
@@ -429,10 +429,12 @@ vagrantConfigureGeneralVagrantfile () {
                 echo "config.registration.skip = true" >> $generalVagrantfile
                 ;;
             file)
+                echo "config.registration.serverurl = 'https://$vagrant_RHN_SERVER_URL/subscription/'" >> $generalVagrantfile
                 echo "config.registration.username = '$vagrant_RHN_USERNAME'" >> $generalVagrantfile
                 echo "config.registration.password = '$vagrant_RHN_PASSWORD'" >> $generalVagrantfile
                 ;;
             env)
+                echo "config.registration.serverurl = ENV['SERVERURL']'" >> $generalVagrantfile
                 echo "config.registration.username = ENV['USERNAME']" >> $generalVagrantfile
                 echo "config.registration.password = ENV['PASSWORD']" >> $generalVagrantfile
                 ;;

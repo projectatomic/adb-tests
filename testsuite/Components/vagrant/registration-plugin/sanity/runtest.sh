@@ -44,13 +44,13 @@ set -o pipefail
 # $1 - prefix to store these info
 get_subscription_id() {
     rlLog "Getting subscription id ($1)"
-    rlRun "vagrant ssh -c 'subscription-manager identity' > $1-identity.txt"
-    rlRun "vagrant ssh -c 'subscription-manager status' > $1-status.txt"
-    rlRun "vagrant ssh -c 'subscription-manager list --consumed' > $1-list-consumed.txt"
-    rlRun "vagrant ssh -c 'subscription-manager facts' > $1-facts.txt"
+    rlRun "vagrant ssh -c 'sudo subscription-manager identity' > $1-identity.txt"
+    rlRun "vagrant ssh -c 'sudo subscription-manager status' > $1-status.txt"
+    rlRun "vagrant ssh -c 'sudo subscription-manager list --consumed' > $1-list-consumed.txt"
+    rlRun "vagrant ssh -c 'sudo subscription-manager facts' > $1-facts.txt"
 
     # parse identity
-    CONSUMER_UUID=$(cat identity.txt | grep -i identity | sed 's/.*: *\(.*\)/\1/')
+    CONSUMER_UUID=$(cat $1-identity.txt | grep -i identity | sed 's/.*: *\(.*\)/\1/' | tr -d '\r\n')
     rlLog "CONSUMER_UUID=$CONSUMER_UUID"
 }
 
@@ -60,9 +60,9 @@ get_subscription_info() {
     test -z $CONSUMER_UUID && { rlFail "Getting subscription info: CONSUMER_UUID not known!"; return; }
     rlLog "Getting subscription info ($1, $CONSUMER_UUID)"
     # get consumer subscription info
-    rlRun "curl -k -u $vagrant_RHN_USERNAME:$vagrant_RHN_PASSWORD $vagrant_RHN_SERVICE_URL/consumers/$CONSUMER_UUID | python -mjson.tool > $1-consumer.txt"
+    rlRun "curl -k -u '$vagrant_RHN_USERNAME:$vagrant_RHN_PASSWORD' '$vagrant_RHN_SERVICE_URL/consumers/$CONSUMER_UUID' | python -mjson.tool > $1-consumer.txt"
     # get entitlement info
-    rlRun "curl -k -u $vagrant_RHN_USERNAME:$vagrant_RHN_PASSWORD $vagrant_RHN_SERVICE_URL/consumers/$CONSUMER_UUID/entitlements | python -mjson.tool > $1-entitlements.txt"
+    rlRun "curl -k -u '$vagrant_RHN_USERNAME:$vagrant_RHN_PASSWORD' '$vagrant_RHN_SERVICE_URL/consumers/$CONSUMER_UUID/entitlements' | python -mjson.tool > $1-entitlements.txt"
 }
 
 # check that SKU in facts and one actually consumed matches
@@ -70,9 +70,9 @@ get_subscription_info() {
 # $2 - consumed file name
 # $3 - entitlement file name
 check_sku() {
-    FACTS_SKU=$(cat $1 | grep dev_sku | sed 's/.*: *//')
+    FACTS_SKU=$(cat $1 | grep dev_sku | sed 's/.*: *//' | tr -d '\r\n')
     rlLog "Facts SKU:    '$FACTS_SKU'"
-    CONSUMED_SKU=$(cat $2 | grep SKU | sed 's/.*: *//')
+    CONSUMED_SKU=$(cat $2 | grep SKU | sed 's/.*: *//' | tr -d '\r\n')
     rlLog "Consumed SKU: '$CONSUMED_SKU'"
     rlRun "test '_$FACTS_SKU' = '_$CONSUMED_SKU'"
     rlAssertEquals "Exactly one developmentPool in entitlements." $(grep developmentPool $3 | wc -l) 1
@@ -88,6 +88,8 @@ rlJournalStart
         rlRun "TmpDir=\$(mktemp -d)" 0 "Creating tmp directory"
         rlRun "pushd $TmpDir"
         rlRun "vagrant init $vagrant_BOX_NAME"
+        rlRun "sed -i \"s/^end/  config.registration.serverurl = '$vagrant_RHN_SERVICE_URL'\nend/\" ./Vagrantfile"
+        cat ./Vagrantfile
     rlPhaseEnd
 
     rlPhaseStartTest skip_registration
@@ -103,19 +105,21 @@ if vagrantRegistrationCredentialsProvided;then
     rlPhaseStartTest manual_registration
         # note: running the box still without registration via plugin (skip in general vagrant file)
         rlRun "vagrant up"
-        rlRun "vagrant ssh -c 'time subscription-manager register --username $vagrant_RHN_USERNAME --password $vagrant_RHN_PASSWORD --serverurl $vagrant_RHN_SERVER_URL --auto-attach' > register.txt"
+        rlRun "vagrant ssh -c 'ls -l /etc/rhsm/facts/ /etc/pki/product/'"
+        rlRun "time vagrant ssh -c 'sudo subscription-manager register --username $vagrant_RHN_USERNAME --password $vagrant_RHN_PASSWORD --serverurl $vagrant_RHN_SERVER_URL --auto-attach' > register.txt"
         get_subscription_id   'manual'
         get_subscription_info 'manual'
 
         check_sku "manual-facts.txt" "manual-list-consumed.txt" "manual-entitlements.txt"
 
-        rlRun "vagrant ssh -c 'time subscription-manager remove --all'"
+        rlRun "time vagrant ssh -c 'sudo subscription-manager remove --all'"
         get_subscription_info 'manual-removed'
         rlRun "grep '\[\]' manual-removed-entitlements.txt"
         rlAssertEquals "No entitlements after 'remove --all'" $(cat manual-removed-entitlements.txt | wc -l) 1
 
-        rlRun "vagrant ssh -c 'time subscription-manager unregister"
-        get_subscription_id   'manual-unregistered'
+        rlRun "time vagrant ssh -c 'sudo subscription-manager unregister'"
+        rlRun "vagrant ssh -c 'sudo subscription-manager identity' > $1-identity.txt" 1
+        rlRun "vagrant ssh -c 'sudo subscription-manager status' > $1-status.txt" 1
         get_subscription_info 'manual-unregistered'
         rlRun "cat manual-unregistered-status.txt"
 
@@ -134,15 +138,11 @@ if vagrantRegistrationCredentialsProvided;then
         get_subscription_info 'plugin-halted'
         rlRun "grep '\[\]' plugin-halted-entitlements.txt"
         rlAssertEquals "No entitlements after halt'" $(cat plugin-halted-entitlements.txt | wc -l) 1
-        rlRun "cat plugin-halted-consumer.txt"
-        rlRun "cat plugin-halted-entitlements.txt"
 
         rlRun "vagrant destroy"
         get_subscription_info 'plugin-destroyed'
         rlRun "grep '\[\]' plugin-destroyed-entitlements.txt"
         rlAssertEquals "No entitlements after halt'" $(cat plugin-destroyed-entitlements.txt | wc -l) 1
-        rlRun "cat plugin-destroyed-consumer.txt"
-        rlRun "cat plugin-destroyed-entitlements.txt"
     rlPhaseEnd
 
     rlPhaseStartTest credentials_in_vagrantfile
@@ -157,6 +157,7 @@ if vagrantRegistrationCredentialsProvided;then
 
     rlPhaseStartTest credentials_from_environment
         vagrantConfigureGeneralVagrantfile "env"
+        export SERVERURL=$vagrant_SERVICE_URL # intentionally SERVICE_URL here
         export USERNAME=$vagrant_RHN_USERNAME
         export PASSWORD=$vagrant_RHN_PASSWORD
         rlRun "vagrant up --provider $vagrant_PROVIDER"
@@ -173,7 +174,8 @@ fi
         #vagrantBoxRemove # can be shared, so skipping
         rlRun "rm -f ~/.vagrant.d/Vagrantfile"
         rlRun "popd"
-        rlRun "rm -r $TmpDir" 0 "Removing tmp directory"
+        rlRun "rlBundleLogs registration-plugin-outputs $TmpDir/*"
+        #rlRun "rm -r $TmpDir" 0 "Removing tmp directory"
     rlPhaseEnd
 rlJournalPrintText
 rlJournalEnd

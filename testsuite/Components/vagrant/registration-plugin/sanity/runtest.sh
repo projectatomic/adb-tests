@@ -88,7 +88,6 @@ rlJournalStart
         rlRun "TmpDir=\$(mktemp -d)" 0 "Creating tmp directory"
         rlRun "pushd $TmpDir"
         rlRun "vagrant init $vagrant_BOX_NAME"
-        rlRun "sed -i \"s/^end/  config.registration.serverurl = '$vagrant_RHN_SERVICE_URL'\nend/\" ./Vagrantfile"
         cat ./Vagrantfile
     rlPhaseEnd
 
@@ -118,8 +117,8 @@ if vagrantRegistrationCredentialsProvided;then
         rlAssertEquals "No entitlements after 'remove --all'" $(cat manual-removed-entitlements.txt | wc -l) 1
 
         rlRun "time vagrant ssh -c 'sudo subscription-manager unregister'"
-        rlRun "vagrant ssh -c 'sudo subscription-manager identity' > $1-identity.txt" 1
-        rlRun "vagrant ssh -c 'sudo subscription-manager status' > $1-status.txt" 1
+        rlRun "vagrant ssh -c 'sudo subscription-manager identity' > manual-unregistered-identity.txt" 1
+        rlRun "vagrant ssh -c 'sudo subscription-manager status' > manual-unregistered-status.txt" 1
         get_subscription_info 'manual-unregistered'
         rlRun "cat manual-unregistered-status.txt"
 
@@ -142,7 +141,7 @@ if vagrantRegistrationCredentialsProvided;then
         rlRun "vagrant destroy"
         get_subscription_info 'plugin-destroyed'
         rlRun "grep '\[\]' plugin-destroyed-entitlements.txt"
-        rlAssertEquals "No entitlements after halt'" $(cat plugin-destroyed-entitlements.txt | wc -l) 1
+        rlAssertEquals "No entitlements after destroy'" $(cat plugin-destroyed-entitlements.txt | wc -l) 1
     rlPhaseEnd
 
     rlPhaseStartTest credentials_in_vagrantfile

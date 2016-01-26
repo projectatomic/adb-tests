@@ -434,7 +434,7 @@ vagrantConfigureGeneralVagrantfile () {
                 echo "config.registration.password = '$vagrant_RHN_PASSWORD'" >> $generalVagrantfile
                 ;;
             env)
-                echo "config.registration.serverurl = ENV['SERVERURL']'" >> $generalVagrantfile
+                echo "config.registration.serverurl = ENV['SERVERURL']" >> $generalVagrantfile
                 echo "config.registration.username = ENV['USERNAME']" >> $generalVagrantfile
                 echo "config.registration.password = ENV['PASSWORD']" >> $generalVagrantfile
                 ;;

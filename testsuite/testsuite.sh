@@ -76,7 +76,7 @@ run_tests () {
 ###############################################################################
 
 testdirs=`find . -name runtest.sh|sed -e 's#/runtest.sh##'`
-testdirs="./Components/vagrant/adbinfo-plugin/smoke"
+#testdirs="./Components/vagrant/adbinfo-plugin/smoke"
 > $TSlog
 
 ############################

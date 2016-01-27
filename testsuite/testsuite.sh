@@ -7,15 +7,26 @@ export vagrant_PLUGINS_DIR=${vagrant_PLUGINS_DIR:-""}
 export vagrant_VAGRANTFILE_DIRS=${vagrant_VAGRANTFILE_DIRS:-""}
 export vagrant_RHN_USERNAME=${USER:-""}
 export vagrant_RHN_PASSWORD=${PASS:-""}
+export vagrant_PROVIDER=${vagrant_PROVIDER:-""}
 export HOST_PLATFORM=${HOST_PLATFORM:-""}
 
 TSlog=$PWD/output
 
-if [ "$HOST_PLATFORM" == "lin" ];then
+if [ "$HOST_PLATFORM" == "lin" ]; then
     SCL="scl enable sclo-vagrant1 --"
 else
     SCL=""
 fi
+
+if [ "$vagrant_PROVIDER" == "" ]; then
+    # set default virtualization provider
+    if [ "$HOST_PLATFORM" == "lin" ]; then
+        vagrant_PROVIDER="libvirt"
+    else
+        vagrant_PROVIDER="virtualbox"
+    fi
+fi
+
 
 
 vagrant_vm_clenup () {
@@ -28,7 +39,7 @@ vagrant_vm_clenup () {
 
 vagrant_plugins_cleanup () {
     # uninstall plugins
-    plugins=`vagrant plugin list|grep -v '^ '|grep -v 'No plugins installed.'|awk '{print $1}'`
+    plugins=`$SCL vagrant plugin list|grep -v '^ '|grep -v 'No plugins installed.'|awk '{print $1}'`
     for plugin in $plugins;
     do
         $SCL vagrant plugin uninstall $plugin
@@ -65,6 +76,7 @@ run_tests () {
 ###############################################################################
 
 testdirs=`find . -name runtest.sh|sed -e 's#/runtest.sh##'`
+testdirs="./Components/vagrant/adbinfo-plugin/smoke"
 > $TSlog
 
 ############################
@@ -79,7 +91,7 @@ echo "logdir with upstream plugins: $logroot" >> $TSlog
 run_tests ""
 
 # don't have local plugins, exit
-[ "$vagrant_PLUGINS_DIR" == "" -o -d "$vagrant_PLUGINS_DIR" ] && exit
+[ "$vagrant_PLUGINS_DIR" != "" -a -d "$vagrant_PLUGINS_DIR" ] || exit
 
 #########################
 # test with local plugins

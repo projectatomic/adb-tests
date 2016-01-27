@@ -429,7 +429,9 @@ vagrantConfigureGeneralVagrantfile () {
                 echo "config.registration.skip = true" >> $generalVagrantfile
                 ;;
             file)
-                echo "config.registration.serverurl = 'https://$vagrant_RHN_SERVER_URL/subscription/'" >> $generalVagrantfile
+                if [ "$vagrant_RHN_SERVER_URL" != "" ]; then
+                    echo "config.registration.serverurl = 'https://$vagrant_RHN_SERVER_URL/subscription/'" >> $generalVagrantfile
+                fi
                 echo "config.registration.username = '$vagrant_RHN_USERNAME'" >> $generalVagrantfile
                 echo "config.registration.password = '$vagrant_RHN_PASSWORD'" >> $generalVagrantfile
                 ;;

@@ -11,6 +11,13 @@ export HOST_PLATFORM=${HOST_PLATFORM:-""}
 
 TSlog=$PWD/output
 
+if [ "$HOST_PLATFORM" == "lin" ];then
+    SCL="scl enable sclo-vagrant1 --"
+else
+    SCL=""
+fi
+
+
 vagrant_vm_clenup () {
     # remove all cdk virtualbox machines
     for vm in `VBoxManage list vms| grep '"tmp.*default'|sed -e 's/.*"\(.*\)".*/\1/'`;
@@ -24,7 +31,7 @@ vagrant_plugins_cleanup () {
     plugins=`vagrant plugin list|grep -v '^ '|grep -v 'No plugins installed.'|awk '{print $1}'`
     for plugin in $plugins;
     do
-        vagrant plugin uninstall $plugin
+        $SCL vagrant plugin uninstall $plugin
     done
 }
 
@@ -37,11 +44,6 @@ run_tests () {
         mkdir -p $logdir
         stdout=$logdir/stdout
         stderr=$logdir/stderr
-        if [ "$HOST_PLATFORM" == "lin" ];then
-            SCL="scl enable sclo-vagrant1 --"
-        else
-            SCL=""
-        fi
         vagrant_PLUGINS_DIR=$1 $SCL ./runtest.sh > $stdout 2> $stderr
         grep -q 'Phases: .* good, 0 bad' $stdout
         if [ $? == 0 ]; then

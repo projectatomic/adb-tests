@@ -53,10 +53,9 @@ run_tests () {
         cd $d
         logdir=$logroot/$d
         mkdir -p $logdir
-        stdout=$logdir/stdout
-        stderr=$logdir/stderr
-        vagrant_PLUGINS_DIR=$1 $SCL ./runtest.sh > $stdout 2> $stderr
-        grep -q 'Phases: .* good, 0 bad' $stdout
+        output=$logdir/output
+        vagrant_PLUGINS_DIR=$1 $SCL ./runtest.sh &> $output
+        grep -q 'Phases: .* good, 0 bad' $output
         if [ $? == 0 ]; then
             echo -e "PASS\t$d"
             echo -e "PASS\t$d" >> $TSlog
@@ -65,9 +64,9 @@ run_tests () {
             echo -e "FAIL\t$d" >> $TSlog
         fi
         # move journal
-        journal=`grep 'JOURNAL XML' $stderr | grep -o '/.*'`
+        journal=`grep 'JOURNAL XML' $output | grep -o '/.*'`
         test -f "$journal" && mv $journal $logdir
-        journal=`grep 'JOURNAL TXT' $stderr | grep -o '/.*'`
+        journal=`grep 'JOURNAL TXT' $output | grep -o '/.*'`
         test -f "$journal" && mv $journal $logdir
         cd - > /dev/null
     done

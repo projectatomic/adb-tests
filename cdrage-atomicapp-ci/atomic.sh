@@ -12,9 +12,17 @@ install_atomic() {
   INSTALLING ATOMIC CLI
   ##########
   "
-  wget $LINK -O atomic.tar.gz
-  tar -xvf atomic.tar.gz
-  cd atomic-$RELEASE
+  if [ "$1" ]
+    then
+      #clean this up later
+      echo "Downloading master"
+      git clone https://github.com/projectatomic/atomic atomic
+      cd atomic
+    else
+      wget $LINK -O atomic.tar.gz
+      tar -xvf atomic.tar.gz
+      cd atomic-$RELEASE
+  fi
   
   # Use rhel yum, if not assume it's ubuntu / debian
   if [ -f /etc/redhat-release ]; then
@@ -41,7 +49,7 @@ install_atomic() {
 
 case "$1" in
         install)
-            install_atomic
+            install_atomic $2
             ;;
         *)
             echo $"Usage: atomic.sh {install}"

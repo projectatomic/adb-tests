@@ -138,7 +138,7 @@ if vagrantRegistrationCredentialsProvided;then
         rlRun "grep '\[\]' plugin-halted-entitlements.txt"
         rlAssertEquals "No entitlements after halt'" $(cat plugin-halted-entitlements.txt | wc -l) 1
 
-        rlRun "vagrant destroy"
+        rlRun "vagrant destroy --force"
         get_subscription_info 'plugin-destroyed'
         rlRun "grep '\[\]' plugin-destroyed-entitlements.txt"
         rlAssertEquals "No entitlements after destroy'" $(cat plugin-destroyed-entitlements.txt | wc -l) 1

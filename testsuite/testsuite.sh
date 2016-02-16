@@ -5,8 +5,8 @@ export vagrant_SHARING=${vagrant_SHARING:-true}
 export vagrant_BOX_PATH=${vagrant_BOX_PATH:-""}
 export vagrant_PLUGINS_DIR=${vagrant_PLUGINS_DIR:-""}
 export vagrant_VAGRANTFILE_DIRS=${vagrant_VAGRANTFILE_DIRS:-""}
-export vagrant_RHN_USERNAME=${USER:-""}
-export vagrant_RHN_PASSWORD=${PASS:-""}
+export vagrant_RHN_USERNAME=${vagrant_RHN_USERNAME:-""}
+export vagrant_RHN_PASSWORD=${vagrant_RHN_PASSWORD:-""}
 export vagrant_PROVIDER=${vagrant_PROVIDER:-""}
 export HOST_PLATFORM=${HOST_PLATFORM:-""}
 

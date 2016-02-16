@@ -393,7 +393,7 @@ skip: skip box registration
 
 file: credentials in general Vagrantfile
 
-env: credentials in variables USERNAME and PASSWORD
+env: credentials in variables SUB_USERNAME and SUB_PASSWORD
 
 =back
 
@@ -437,8 +437,8 @@ vagrantConfigureGeneralVagrantfile () {
                 ;;
             env)
                 echo "config.registration.serverurl = ENV['SERVERURL']" >> $generalVagrantfile
-                echo "config.registration.username = ENV['USERNAME']" >> $generalVagrantfile
-                echo "config.registration.password = ENV['PASSWORD']" >> $generalVagrantfile
+                echo "config.registration.username = ENV['SUB_USERNAME']" >> $generalVagrantfile
+                echo "config.registration.password = ENV['SUB_PASSWORD']" >> $generalVagrantfile
                 ;;
             *)
                 echo "ERROR: unexpected argument '$1' for function registration_plugin_configure"

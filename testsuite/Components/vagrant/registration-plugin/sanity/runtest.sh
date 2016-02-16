@@ -157,8 +157,8 @@ if vagrantRegistrationCredentialsProvided;then
     rlPhaseStartTest credentials_from_environment
         vagrantConfigureGeneralVagrantfile "env"
         export SERVERURL=$vagrant_SERVICE_URL # intentionally SERVICE_URL here
-        export USERNAME=$vagrant_RHN_USERNAME
-        export PASSWORD=$vagrant_RHN_PASSWORD
+        export SUB_USERNAME=$vagrant_RHN_USERNAME
+        export SUB_PASSWORD=$vagrant_RHN_PASSWORD
         rlRun "vagrant up --provider $vagrant_PROVIDER"
         rlRun "vagrant ssh -c 'echo hello' | grep hello"
         rlRun "vagrant ssh -c 'sudo subscription-manager status'"

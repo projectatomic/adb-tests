@@ -18,7 +18,7 @@ export vagrant_RHN_USERNAME=${vagrant_RHN_USERNAME:-""}
 export vagrant_RHN_PASSWORD=${vagrant_RHN_PASSWORD:-""}
 export vagrant_RHN_SERVER_URL=${vagrant_RHN_SERVER_URL:-""}
 export vagrant_PROVIDER=${vagrant_PROVIDER:-""}
-export vagrant_SCL=${vagrant_SCL:-sclo-vagrant1}
+export vagrant_SCL=${vagrant_SCL:-""}
 export HOST_PLATFORM=${HOST_PLATFORM:-""}
 
 TSlog=$PWD/output

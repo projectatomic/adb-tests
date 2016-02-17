@@ -21,6 +21,10 @@ export vagrant_PROVIDER=${vagrant_PROVIDER:-""}
 export vagrant_SCL=${vagrant_SCL:-""}
 export HOST_PLATFORM=${HOST_PLATFORM:-""}
 
+# use testdirs parameter to run specific test(s)
+foundtestdirs=`find . -name runtest.sh|sed -e 's#/runtest.sh##'`
+testdirs=${testdirs:-$foundtestdirs}
+
 TSlog=$PWD/output
 
 if [ "_$HOST_PLATFORM" == "_lin" -a "_$vagrant_SCL" != "_" ]; then
@@ -85,8 +89,6 @@ run_tests () {
 
 ###############################################################################
 
-testdirs=`find . -name runtest.sh|sed -e 's#/runtest.sh##'`
-#testdirs="./Components/vagrant/adbinfo-plugin/smoke"
 > $TSlog
 
 ############################

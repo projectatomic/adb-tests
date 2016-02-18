@@ -52,7 +52,7 @@ for dir in $vagrant_VAGRANTFILE_DIRS;do
         #    rlDie "test do not have Vagrantfile for rhel-ose
         rlRun "pushd $dir"
         rlLogInfo "Testing without running VM"
-        rlRun "vagrant service-manager env docker > stdout 2> stderr"
+        rlRun "vagrant service-manager env docker > stdout 2> stderr" 1-255
         echo -e "stdout:\n========"
         cat stdout
         echo -e "stderr:\n========"

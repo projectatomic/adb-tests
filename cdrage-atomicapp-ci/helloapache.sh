@@ -13,10 +13,10 @@ docker build -t projectatomic/helloapache \
 case "$1" in
         run)
             mkdir build
-            atomic run projectatomic/helloapache --provider=$2 -a answers.conf --destination=build
+            atomic run projectatomic/helloapache --provider=$2 -a answers.conf -v --destination=build
             ;;
         stop)
-            atomic stop projectatomic/helloapache --provider=$2 build/
+            atomic stop projectatomic/helloapache --provider=$2 -v build/
             ;;
         *)
             echo $"Usage: helloapache.sh {run|stop}"

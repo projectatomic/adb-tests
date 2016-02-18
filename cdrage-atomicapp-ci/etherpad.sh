@@ -24,10 +24,10 @@ case "$1" in
               db_name = foo
             " >> answers.conf
             mkdir build
-            atomic run etherpad --provider=$2 -a answers.conf --destination=build
+            atomic run etherpad --provider=$2 -a answers.conf -v --destination=build
             ;;
         stop)
-            atomic stop etherpad --provider=$2 build/
+            atomic stop etherpad --provider=$2 -v build/
 
             # Since the names are hard-coded
             docker rm -f mariadb-atomicapp-app etherpad-atomicapp etherpad || true

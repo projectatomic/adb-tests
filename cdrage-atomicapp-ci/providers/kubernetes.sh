@@ -8,6 +8,11 @@ start_k8s() {
   STARTING KUBERNETES
   ##########
   "
+  if [ ! -f /usr/bin/kubectl ] && [ ! -f /usr/local/bin/kubectl ]; then
+    echo "No kubectl bin exists? Please install."
+    return 1
+  fi
+
   # Use alpha for now since this contains the new hyperkube format going forward
   K8S_VERSION=1.2.0-alpha.7
   docker run \

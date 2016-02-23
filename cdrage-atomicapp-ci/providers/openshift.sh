@@ -9,6 +9,11 @@ start_openshift() {
   STARTING OPENSHIFT 
   ##########
   "
+  if [ ! -f /usr/bin/kubectl ] && [ ! -f /usr/local/bin/kubectl ]; then
+    echo "No kubectl bin exists? Please install."
+    return 1
+  fi
+
   docker rm -f origin
   docker run -d --name "origin" \
     --privileged --pid=host --net=host \

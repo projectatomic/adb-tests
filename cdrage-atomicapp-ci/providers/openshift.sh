@@ -15,6 +15,7 @@ start_openshift() {
     -v /:/rootfs:ro -v /var/run:/var/run:rw -v /sys:/sys -v /var/lib/docker:/var/lib/docker:rw \
     -v /var/lib/origin/openshift.local.volumes:/var/lib/origin/openshift.local.volumes \
     openshift/origin start
+
   until nc -z 127.0.0.1 8443;
   do
       echo ...
@@ -30,9 +31,14 @@ stop_openshift() {
   "
   docker rm -f origin
 
-  # Remove underlying kubernetes containers created as result of using OpenShift with k8s as back-end
-  docker ps -a | grep 'gcr.io/google_containers' | awk '{print $1}' | xargs --no-run-if-empty docker rm -f || true
-  docker ps -a | grep 'k8s_' | awk '{print $1}' | xargs --no-run-if-empty docker rm -f || true
+  # Remove all kubernetes back-end containers created by origin
+  # Ran twice due to Debian aufs "busy" driver issue
+  for run in {0..2}
+  do
+    docker ps -a | grep 'gcr.io/google_containers/hyperkube' | awk '{print $1}' | xargs --no-run-if-empty docker rm -f
+    docker ps -a | grep 'gcr.io/google_containers/etcd' | awk '{print $1}' | xargs --no-run-if-empty docker rm -f
+    docker ps -a | grep 'k8s_' | awk '{print $1}' | xargs --no-run-if-empty docker rm -f || true
+  done
 }
 
 answers_openshift() {
@@ -63,17 +69,12 @@ answers_openshift() {
   echo "OpenShift Origin answers file located at $PWD"
 }
 
-case "$1" in
-        start)
-            start_openshift
-            ;;
-        stop)
-            stop_openshift
-            ;;
-        answers)
-            answers_openshift
-            ;;
-        *)
-            echo $"Usage: openshift.sh {start|stop|answers}"
-            exit 1
-esac
+if [[ $1 == "answers" ]]; then
+  answers_openshift
+elif [[ $1 == "start" ]]; then
+  start_openshift
+elif [[ $1 == "stop" ]]; then
+  stop_openshift
+else
+  echo $"Usage: openshift.sh {answers|start|stop}"
+fi

@@ -5,7 +5,6 @@ $1: TESTING WORDPRESS EXAMPLE
 ##########
 "
 
-# We build mariadb. as wordpress uses an aggregated database of mariadb
 docker build -t projectatomic/mariadb-centos7-atomicapp \
   -f nulecule-library/mariadb-centos7-atomicapp/Dockerfile \
   --no-cache \
@@ -16,33 +15,56 @@ docker build -t wordpress \
   --no-cache \
   nulecule-library/wordpress-centos7-atomicapp/
 
-case "$1" in
-        run)
-            echo "
-            [mariadb-atomicapp]
-              db_user = foo
-              db_pass = foo
-              db_name = foo
+run_wordpress() {
+  echo "
+[mariadb-atomicapp]
+  db_user = foo
+  db_pass = foo
+  db_name = foo
 
-            [wordpress]
-              db_user = foo
-              db_pass = foo
-              db_name = foo
-            " >> answers.conf
-            mkdir build
-            atomic run wordpress --provider=$2 -a answers.conf -v --destination=build
-            ;;
-        stop)
-            atomic stop wordpress --provider=$2 -v build/
+[wordpress]
+  db_user = foo
+  db_pass = foo
+  db_name = foo
+  " >> answers.conf
+  mkdir build
+  atomic run wordpress --provider=$1 -a answers.conf -v --destination=build
+}
 
-            # Remove Docker-provider-specific containers
-            docker rm -f mariadb-atomicapp-app wordpress-atomicapp || true
+stop_wordpress() {
+  atomic stop wordpress --provider=$1 -v build/
 
-            # Sometimes mariadb takes *forever* to shut-down (don't know why) via k8s. Force remove it.
-            docker ps -a | grep 'k8s_mariadb' | awk '{print $1}' | xargs --no-run-if-empty docker rm -f || true
+  # Remove Docker-provider-specific containers
+  if [[ $1 == "docker" ]]; then
+    docker rm -f mariadb-atomicapp-app wordpress-atomicapp wordpress || true
 
-            ;;
-        *)
-            echo $"Usage: wordpress.sh {run|stop}"
-            exit 1
-esac
+  # Wait for k8s containers to finish terminating
+  # will change in the future to something in providers/kubernetes.sh
+  elif [[ $1 == "kubernetes" ]]; then
+    echo "Waiting for k8s po/svc/rc to finish terminating..."
+    kubectl get po,svc,rc
+    sleep 3 # give kubectl chance to catch up to api call
+    while [ 1 ]
+    do
+      k8s=`kubectl get po,svc,rc | grep Terminating`
+      if [[ $k8s == "" ]]
+      then
+        echo "k8s po/svc/rc terminated!"
+        exit
+      else
+        echo "..."
+      fi
+      sleep 1
+    done
+
+  fi
+}
+
+if [[ $1 == "run" ]]; then
+  run_wordpress ${@:2}
+elif [[ $1 == "stop" ]]; then
+  stop_wordpress ${@:2}
+else
+  echo $"Usage: wordpress.sh {run|stop}"
+  exit 1
+fi

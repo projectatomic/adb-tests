@@ -5,37 +5,67 @@ $1: TESTING ETHERPAD EXAMPLE
 ##########
 "
 
+docker build -t projectatomic/mariadb-centos7-atomicapp \
+  -f nulecule-library/mariadb-centos7-atomicapp/Dockerfile \
+  --no-cache \
+  nulecule-library/mariadb-centos7-atomicapp/
+
 docker build -t etherpad \
   -f nulecule-library/etherpad-centos7-atomicapp/Dockerfile \
   --no-cache \
   nulecule-library/etherpad-centos7-atomicapp/
 
-case "$1" in
-        run)
-            echo "
-            [mariadb-atomicapp]
-              db_user = foo
-              db_pass = foo
-              db_name = foo
 
-            [etherpad-app]
-              db_user = foo
-              db_pass = foo
-              db_name = foo
-            " >> answers.conf
-            mkdir build
-            atomic run etherpad --provider=$2 -a answers.conf -v --destination=build
-            ;;
-        stop)
-            atomic stop etherpad --provider=$2 -v build/
+run_etherpad() {
+  echo "
+[mariadb-atomicapp]
+  db_user = foo
+  db_pass = foo
+  db_name = foo
 
-            # Remove Docker-provider-specific containers
-            docker rm -f mariadb-atomicapp-app etherpad-atomicapp etherpad || true
+[etherpad-app]
+  db_user = foo
+  db_pass = foo
+  db_name = foo
+  " >> answers.conf
+  mkdir build
+  atomic run etherpad --provider=$1 -a answers.conf -v --destination=build
+}
 
-            # Sometimes mariadb takes *forever* to shut-down (don't know why) via k8s. Force remove it.
-            docker ps -a | grep 'k8s_mariadb' | awk '{print $1}' | xargs --no-run-if-empty docker rm -f || true
-            ;;
-        *)
-            echo $"Usage: etherpad.sh {run|stop}"
-            exit 1
-esac
+stop_etherpad() {
+  atomic stop etherpad --provider=$1 -v build/
+
+  # Remove Docker-provider-specific containers
+  if [[ $1 == "docker" ]]; then
+    docker rm -f mariadb-atomicapp-app etherpad-atomicapp etherpad || true
+
+  # Wait for k8s containers to finish terminating
+  # will change in the future to something in providers/kubernetes.sh
+  elif [[ $1 == "kubernetes" ]]; then
+    echo "Waiting for k8s po/svc/rc to finish terminating..."
+    kubectl get po,svc,rc
+    sleep 3 # give kubectl chance to catch up to api call
+    while [ 1 ]
+    do
+      k8s=`kubectl get po,svc,rc | grep Terminating`
+      if [[ $k8s == "" ]]
+      then
+        echo "k8s po/svc/rc terminated!"
+        exit
+      else
+        echo "..."
+      fi
+      sleep 1
+    done
+
+  fi
+}
+
+if [[ $1 == "run" ]]; then
+  run_etherpad ${@:2}
+elif [[ $1 == "stop" ]]; then
+  stop_etherpad ${@:2}
+else
+  echo $"Usage: etherpad.sh {run|stop}"
+  exit 1
+fi

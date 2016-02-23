@@ -49,7 +49,6 @@ stop_k8s() {
   # Delete via image name google_containers
   # Delete all containers started (names start with k8s_)
   # Run twice in-case a container is replicated during that time
-  echo "\n-----Removing all k8s containers-----\n"
   for run in {0..2}
   do
     docker ps -a | grep 'k8s_' | awk '{print $1}' | xargs --no-run-if-empty docker rm -f

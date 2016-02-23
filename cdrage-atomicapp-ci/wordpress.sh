@@ -35,8 +35,12 @@ case "$1" in
         stop)
             atomic stop wordpress --provider=$2 -v build/
 
-            # Since the names are hard-coded
+            # Remove Docker-provider-specific containers
             docker rm -f mariadb-atomicapp-app wordpress-atomicapp || true
+
+            # Sometimes mariadb takes *forever* to shut-down (don't know why) via k8s. Force remove it.
+            docker ps -a | grep 'k8s_mariadb' | awk '{print $1}' | xargs --no-run-if-empty docker rm -f || true
+
             ;;
         *)
             echo $"Usage: wordpress.sh {run|stop}"

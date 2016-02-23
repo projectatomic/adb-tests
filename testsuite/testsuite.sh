@@ -1,19 +1,34 @@
 #!/bin/bash
 
+INSTALL_SETTINGS=${INSTALL_SETTINGS:-install_settings.sh}
+if [ -x $INSTALL_SETTINGS ]; then
+    . $INSTALL_SETTINGS 
+    echo "Sourced install settings from $INSTALL_SETTINGS"
+    set | grep vagrant
+else
+    echo "Install settings not found in $INSTALL_SETTINGS"
+fi
+
 # todo: get input from command line
 export vagrant_SHARING=${vagrant_SHARING:-true}
 export vagrant_BOX_PATH=${vagrant_BOX_PATH:-""}
 export vagrant_PLUGINS_DIR=${vagrant_PLUGINS_DIR:-""}
 export vagrant_VAGRANTFILE_DIRS=${vagrant_VAGRANTFILE_DIRS:-""}
-export vagrant_RHN_USERNAME=${USER:-""}
-export vagrant_RHN_PASSWORD=${PASS:-""}
+export vagrant_RHN_USERNAME=${vagrant_RHN_USERNAME:-""}
+export vagrant_RHN_PASSWORD=${vagrant_RHN_PASSWORD:-""}
+export vagrant_RHN_SERVER_URL=${vagrant_RHN_SERVER_URL:-""}
 export vagrant_PROVIDER=${vagrant_PROVIDER:-""}
+export vagrant_SCL=${vagrant_SCL:-""}
 export HOST_PLATFORM=${HOST_PLATFORM:-""}
+
+# use testdirs parameter to run specific test(s)
+foundtestdirs=`find . -name runtest.sh|sed -e 's#/runtest.sh##'`
+testdirs=${testdirs:-$foundtestdirs}
 
 TSlog=$PWD/output
 
-if [ "$HOST_PLATFORM" == "lin" ]; then
-    SCL="scl enable sclo-vagrant1 --"
+if [ "_$HOST_PLATFORM" == "_lin" -a "_$vagrant_SCL" != "_" ]; then
+    SCL="scl enable $vagrant_SCL --"
 else
     SCL=""
 fi
@@ -74,8 +89,6 @@ run_tests () {
 
 ###############################################################################
 
-testdirs=`find . -name runtest.sh|sed -e 's#/runtest.sh##'`
-#testdirs="./Components/vagrant/adbinfo-plugin/smoke"
 > $TSlog
 
 ############################

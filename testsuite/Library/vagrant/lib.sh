@@ -278,13 +278,13 @@ vagrantPluginInstall() {
     [ $# -eq 1 ] || [ $# -eq 2 -a "$2" == "--force" ] || { rlFail 'Wrong usage'; return 1; }
     if [ "$2" == "--force" -o "$vagrant_SHARING" == "false" ];then
         # uninstall plugin first if needed
-        if `vagrant plugin list | grep -q $1`;then
+        if `vagrant plugin list | grep $1`;then
             vagrantPluginUninstall $1
         fi
     fi
 
     # skip if sharing enabled and plugin already installed
-    if [ "$vagrant_SHARING" == "true" ] && vagrant plugin list | grep -q $1; then
+    if [ "$vagrant_SHARING" == "true" ] && vagrant plugin list | grep $1; then
         rlLog "Plugin $1 already installed, installation skipped."
     else
         # install itself
@@ -297,7 +297,7 @@ vagrantPluginInstall() {
 
     rlLogInfo "Plugin `vagrant plugin list | grep $1` installed"
     # final check
-    vagrant plugin list | grep -q $1
+    vagrant plugin list | grep $1
 
     return $?
 }
@@ -330,7 +330,7 @@ vagrantPluginUninstall() {
     [ $# -ne 1 ] && { rlFail 'Wrong usage'; return 1; };
 
     # uninstall 
-    if `vagrant plugin list | grep -q $1`; then
+    if `vagrant plugin list | grep $1`; then
         rlRun "vagrant plugin uninstall $1"
         vagrant plugin list | grep $1 && rlFail "Plugin uninstall failed"
         [ $? -ne 1 ] && return 1
@@ -393,7 +393,7 @@ skip: skip box registration
 
 file: credentials in general Vagrantfile
 
-env: credentials in variables USERNAME and PASSWORD
+env: credentials in variables SUB_USERNAME and SUB_PASSWORD
 
 =back
 
@@ -417,7 +417,7 @@ vagrantConfigureGeneralVagrantfile () {
     fi
     vagrant plugin list
     vagrant plugin list | grep registration
-    if vagrant plugin list | grep -q registration; then
+    if vagrant plugin list | grep registration; then
         HAS_REG_PLUGIN=true
     else
         HAS_REG_PLUGIN=false
@@ -437,8 +437,8 @@ vagrantConfigureGeneralVagrantfile () {
                 ;;
             env)
                 echo "config.registration.serverurl = ENV['SERVERURL']" >> $generalVagrantfile
-                echo "config.registration.username = ENV['USERNAME']" >> $generalVagrantfile
-                echo "config.registration.password = ENV['PASSWORD']" >> $generalVagrantfile
+                echo "config.registration.username = ENV['SUB_USERNAME']" >> $generalVagrantfile
+                echo "config.registration.password = ENV['SUB_PASSWORD']" >> $generalVagrantfile
                 ;;
             *)
                 echo "ERROR: unexpected argument '$1' for function registration_plugin_configure"

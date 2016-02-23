@@ -119,7 +119,7 @@ Returns 0 when the plugin is successfully uninstalled, non-zero otherwise.
 
 ## vagrantRegistrationCredentialsProvided
 
-Check if file with vagrant box is provided in variables vagrant\_RHN\_USERNAME and vagrant\_RHN\_PASSWORD
+Check if registration credentials are provided in variables vagrant\_RHN\_USERNAME and vagrant\_RHN\_PASSWORD
 
     vagrantRegistrationCredentialsProvided
 
@@ -137,7 +137,7 @@ Configure main Vagrantfile (in ~/.vagrant.d).
 
     file: credentials in general Vagrantfile
 
-    env: credentials in variables USERNAME and PASSWORD
+    env: credentials in variables SUB\_USERNAME and SUB\_PASSWORD
 
 # AUTHORS
 

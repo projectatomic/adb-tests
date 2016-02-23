@@ -138,7 +138,7 @@ if vagrantRegistrationCredentialsProvided;then
         rlRun "grep '\[\]' plugin-halted-entitlements.txt"
         rlAssertEquals "No entitlements after halt'" $(cat plugin-halted-entitlements.txt | wc -l) 1
 
-        rlRun "vagrant destroy"
+        rlRun "vagrant destroy --force"
         get_subscription_info 'plugin-destroyed'
         rlRun "grep '\[\]' plugin-destroyed-entitlements.txt"
         rlAssertEquals "No entitlements after destroy'" $(cat plugin-destroyed-entitlements.txt | wc -l) 1
@@ -157,8 +157,8 @@ if vagrantRegistrationCredentialsProvided;then
     rlPhaseStartTest credentials_from_environment
         vagrantConfigureGeneralVagrantfile "env"
         export SERVERURL=$vagrant_SERVICE_URL # intentionally SERVICE_URL here
-        export USERNAME=$vagrant_RHN_USERNAME
-        export PASSWORD=$vagrant_RHN_PASSWORD
+        export SUB_USERNAME=$vagrant_RHN_USERNAME
+        export SUB_PASSWORD=$vagrant_RHN_PASSWORD
         rlRun "vagrant up --provider $vagrant_PROVIDER"
         rlRun "vagrant ssh -c 'echo hello' | grep hello"
         rlRun "vagrant ssh -c 'sudo subscription-manager status'"

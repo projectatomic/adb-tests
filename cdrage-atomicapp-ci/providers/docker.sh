@@ -22,14 +22,11 @@ stop_docker() {
    docker ps -a | grep 'foobar_' | awk '{print $1}' | xargs --no-run-if-empty docker rm -f
 }
 
-case "$1" in
-        answers)
-            answers_docker
-            ;;
-        stop)
-            stop_docker 
-            ;;
-        *)
-            echo $"Usage: docker.sh {answers|stop}"
-            exit 1
-esac
+if [[ $1 == "answers" ]]; then
+  answers_docker
+elif [[ $1 == "stop" ]]; then
+  stop_docker
+else
+  echo $"Usage: docker.sh {answers|stop}"
+fi
+

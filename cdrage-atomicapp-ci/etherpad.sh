@@ -51,7 +51,7 @@ stop_etherpad() {
       if [[ $k8s == "" ]]
       then
         echo "k8s po/svc/rc terminated!"
-        exit
+        break
       else
         echo "..."
       fi

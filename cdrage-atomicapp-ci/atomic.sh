@@ -20,7 +20,7 @@ install_atomic() {
       cd atomic
     else
       wget $LINK -O atomic.tar.gz
-      tar -xvf atomic.tar.gz
+      tar --no-same-owner -xvf atomic.tar.gz
       cd atomic-$RELEASE
   fi
   

@@ -38,6 +38,8 @@ rlJournalStart
         vagrantBoxAdd || rlDie
         vagrantPluginInstall vagrant-adbinfo
         vagrantConfigureGeneralVagrantfile "skip"
+        rlRun "vagrant init $vagrant_BOX_NAME"
+        rlRun "popd"
     rlPhaseEnd
 
     rlPhaseStartTest without_running_vm
@@ -45,8 +47,21 @@ rlJournalStart
         rlRun "vagrant adbinfo 2>&1 | grep 'target machine is required to run'"
     rlPhaseEnd
 
-    rlPhaseStartTest with_running_vm
-        rlRun "vagrant init $vagrant_BOX_NAME"
+
+
+  for d in $TmpDir $vagrant_VAGRANTFILE_DIRS; do
+        if [ "$d" == "$TmpDir" ]; then
+            rlPhaseStartTest "testing new Vagrantfile"
+        else
+            rlPhaseStartTest "testing Vangrantfile from `basename $d` directory"
+        fi
+        if ! test -f $d/Vagrantfile ; then
+            rlFail "$d/Vagrantfile doesn't exist"
+            rlPhaseEnd
+            continue
+        fi
+        rlRun "pushd $d"
+
         rlRun "vagrant up --provider $vagrant_PROVIDER"
         #rlRun "vagrant adbinfo > output 2> errors"
         rlRun "echo 'y' | vagrant adbinfo > output 2> errors"
@@ -63,12 +78,13 @@ rlJournalStart
         rlAssertGrep "export DOCKER_MACHINE_NAME=[0-9a-f]*" output
         rlAssertGrep 'eval "$(vagrant adbinfo)' output
         rlAssertNotGrep 'error\|fail' output -i
+        rlRun "vagrant destroy --force"
+        rlRun "popd"
     rlPhaseEnd
+done
 
 
     rlPhaseStartCleanup
-        rlRun "vagrant destroy --force"
-        rlRun "popd"
         rlRun "rm -r $TmpDir" 0 "Removing tmp directory"
     rlPhaseEnd
 rlJournalPrintText

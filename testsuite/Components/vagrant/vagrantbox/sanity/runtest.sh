@@ -58,6 +58,8 @@ rlJournalStart
         rlRun "touch testfile"
         rlRun "vagrant rsync"
         rlRun "vagrant ssh -c 'ls /vagrant/testfile'"
+        rlRun "vagrant ssh -c 'ping -n 1 8.8.8.8'" 0 "testing network access from box"
+        rlRun "vagrant ssh -c 'ping -n 1 www.redhat.com'" 0 "testing dns from box"
         rlRun "vagrant suspend"
         rlRun "vagrant resume"
         rlRun "vagrant reload"

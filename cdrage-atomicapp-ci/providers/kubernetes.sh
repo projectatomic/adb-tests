@@ -36,8 +36,9 @@ start_k8s() {
       --cluster-domain=cluster.local \
       --allow-privileged=true --v=2
 
-
-  until nc -z 127.0.0.1 8080;
+  until nmap -Pn 127.0.0.1 -p 8080 -oX - | \
+        xmllint --xpath '//port[@portid="8080"]/state/@state' - > \
+        /dev/null 2>&1;
   do
       echo ...
       sleep 1

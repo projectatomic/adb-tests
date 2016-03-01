@@ -21,7 +21,7 @@ start_openshift() {
     -v /var/lib/origin/openshift.local.volumes:/var/lib/origin/openshift.local.volumes \
     openshift/origin start
 
-  until nc -z 127.0.0.1 8443;
+  until curl 127.0.0.1:8443 &>/dev/null;
   do
       echo ...
       sleep 1

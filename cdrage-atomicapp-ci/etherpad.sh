@@ -12,7 +12,6 @@ docker build -t projectatomic/mariadb-centos7-atomicapp \
 
 docker build -t etherpad \
   -f nulecule-library/etherpad-centos7-atomicapp/Dockerfile \
-  --no-cache \
   nulecule-library/etherpad-centos7-atomicapp/
 
 

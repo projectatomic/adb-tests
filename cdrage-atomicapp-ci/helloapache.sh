@@ -7,7 +7,6 @@ $1: TESTING HELLOAPACHE EXAMPLE
 
 docker build -t projectatomic/helloapache \
   -f nulecule-library/helloapache/Dockerfile \
-  --no-cache \
   nulecule-library/helloapache
 
 run_helloapache() {

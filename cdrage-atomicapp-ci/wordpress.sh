@@ -7,12 +7,10 @@ $1: TESTING WORDPRESS EXAMPLE
 
 docker build -t projectatomic/mariadb-centos7-atomicapp \
   -f nulecule-library/mariadb-centos7-atomicapp/Dockerfile \
-  --no-cache \
   nulecule-library/mariadb-centos7-atomicapp/
 
 docker build -t wordpress \
   -f nulecule-library/wordpress-centos7-atomicapp/Dockerfile \
-  --no-cache \
   nulecule-library/wordpress-centos7-atomicapp/
 
 run_wordpress() {

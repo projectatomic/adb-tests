@@ -11,7 +11,8 @@ docker build -t projectatomic/helloapache \
 
 run_helloapache() {
   mkdir build
-  atomic run projectatomic/helloapache --provider=$1 -a answers.conf -v --destination=build
+  atomic run projectatomic/helloapache --provider=$1 \
+    -a answers.conf -v --destination=build --logtype=nocolor
 }
 
 stop_helloapache() {

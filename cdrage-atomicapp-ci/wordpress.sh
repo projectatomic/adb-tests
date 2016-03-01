@@ -26,7 +26,8 @@ run_wordpress() {
   db_name = foo
   " >> answers.conf
   mkdir build
-  atomic run wordpress --provider=$1 -a answers.conf -v --destination=build
+  atomic run wordpress --provider=$1 \
+    -a answers.conf -v --destination=build --logtype=nocolor
 }
 
 stop_wordpress() {

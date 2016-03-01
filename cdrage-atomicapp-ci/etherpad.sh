@@ -29,7 +29,8 @@ run_etherpad() {
   db_name = foo
   " >> answers.conf
   mkdir build
-  atomic run etherpad --provider=$1 -a answers.conf -v --destination=build
+  atomic run etherpad --provider=$1 \
+    -a answers.conf -v --destination=build --logtype=nocolor
 }
 
 stop_etherpad() {

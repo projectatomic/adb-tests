@@ -3,7 +3,7 @@ ACTION := "run"
 
 install:
 	# Install Atomic CLI and Atomic App CLI
-	./atomic.sh install $(ATOMIC_MASTER)
+	./atomic.sh install $(ATOMIC_SOURCE)
 	./atomicapp.sh install $(ATOMICAPP_PR)
 
 	# Download the library as well

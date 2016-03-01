@@ -3,6 +3,7 @@
 # NOTE, atomic 1.8 requires Docker 1.9
 RELEASE="1.8"
 LINK="https://github.com/projectatomic/atomic/archive/v1.8.tar.gz"
+SOURCE=$2
 
 # Install according to github docs 
 # https://github.com/projectatomic/atomic/tree/master/docs/install
@@ -12,16 +13,18 @@ install_atomic() {
   INSTALLING ATOMIC CLI
   ##########
   "
-  if [ "$1" ]
-    then
-      #clean this up later
-      echo "Downloading master"
-      git clone https://github.com/projectatomic/atomic atomic
-      cd atomic
-    else
-      wget $LINK -O atomic.tar.gz
-      tar --no-same-owner -xvf atomic.tar.gz
-      cd atomic-$RELEASE
+  if [ "$SOURCE" == "rpm" ]; then
+    yum install -y atomic
+    return
+  elif [ "$SOURCE" == "master" ]; then
+    #clean this up later
+    echo "Downloading master"
+    git clone https://github.com/projectatomic/atomic atomic
+    cd atomic
+  else
+    wget $LINK -O atomic.tar.gz
+    tar --no-same-owner -xvf atomic.tar.gz
+    cd atomic-$RELEASE
   fi
   
   # Use rhel yum, if not assume it's ubuntu / debian
@@ -49,7 +52,7 @@ install_atomic() {
 
 case "$1" in
         install)
-            install_atomic $2
+            install_atomic
             ;;
         *)
             echo $"Usage: atomic.sh {install}"

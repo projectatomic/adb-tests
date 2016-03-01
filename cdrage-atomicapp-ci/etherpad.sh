@@ -5,11 +5,12 @@ $1: TESTING ETHERPAD EXAMPLE
 ##########
 "
 
+# Build mariadb - etherpad uses mariadb
 docker build -t projectatomic/mariadb-centos7-atomicapp \
   -f nulecule-library/mariadb-centos7-atomicapp/Dockerfile \
-  --no-cache \
   nulecule-library/mariadb-centos7-atomicapp/
 
+# Build etherpad
 docker build -t etherpad \
   -f nulecule-library/etherpad-centos7-atomicapp/Dockerfile \
   nulecule-library/etherpad-centos7-atomicapp/

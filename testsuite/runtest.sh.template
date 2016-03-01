@@ -2,9 +2,9 @@
 # vim: dict+=/usr/share/beakerlib/dictionary.vim cpt=.,w,b,u,t,i,k
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
-#   runtest.sh of VAGRANT/PATH/TO/TEST/
+#   runtest.sh of /PATH/TO/TEST/
 #   Description: WRITE SHORT DESCRIPTION WHAT TEST DOES
-#   Author: NAME SURNAME <USERNAME@domain>
+#   Author: NAME SURNAME <USERNAME@DOMAIN>
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
@@ -26,9 +26,9 @@
 #
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-# Include Beaker environment
+# Include Beakerlib environment
+# Beakerlib manual: https://fedorahosted.org/beakerlib/wiki/Manual
 . /usr/share/beakerlib/beakerlib.sh || exit 1
-
 
 rlJournalStart
     rlPhaseStartSetup
@@ -45,7 +45,6 @@ rlJournalStart
     rlPhaseStartTest test_phase_name2
        rlLog "some testing"
     rlPhaseEnd
-
 
     rlPhaseStartCleanup
         #rlRun "vagrant destroy --force"

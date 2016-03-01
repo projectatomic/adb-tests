@@ -33,7 +33,17 @@ run_etherpad() {
 }
 
 stop_etherpad() {
-  atomic stop etherpad --provider=$1 -v build/
+  # Workaround atomic cli bug prior to 1.8 so we must determine if the
+  # version of atomic cli is at least 1.8. Do this by comparing the
+  # atomic cli version with "1.8". If the lesser version is "1.8"
+  # then the version we are using is >= "1.8".
+  atomicversion=$(atomic --version)
+  lesserversion=$(echo -e "${atomicversion}\n1.8" | sort -V | head -n 1)
+  if [ "$lesserversion" != '1.8' ]; then
+    atomicapp stop -v build/
+  else
+    atomic stop etherpad -v build/
+  fi
 
   # Remove Docker-provider-specific containers
   if [[ $1 == "docker" ]]; then

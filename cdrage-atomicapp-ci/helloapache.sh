@@ -15,7 +15,17 @@ run_helloapache() {
 }
 
 stop_helloapache() {
-  atomic stop projectatomic/helloapache --provider=$1 -v build/
+  # Workaround atomic cli bug prior to 1.8 so we must determine if the
+  # version of atomic cli is at least 1.8. Do this by comparing the
+  # atomic cli version with "1.8". If the lesser version is "1.8"
+  # then the version we are using is >= "1.8".
+  atomicversion=$(atomic --version)
+  lesserversion=$(echo -e "${atomicversion}\n1.8" | sort -V | head -n 1)
+  if [ "$lesserversion" != '1.8' ]; then
+    atomicapp stop -v build/
+  else
+    atomic stop projectatomic/helloapache -v build/
+  fi
 
   # Wait for k8s containers to finish terminating
   # will change in the future to something in providers/kubernetes.sh

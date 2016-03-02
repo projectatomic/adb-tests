@@ -37,7 +37,7 @@ start_k8s() {
       --allow-privileged=true --v=2
 
 
-  until nc -z 127.0.0.1 8080;
+  until curl 127.0.0.1:8080 &>/dev/null;
   do
       echo ...
       sleep 1

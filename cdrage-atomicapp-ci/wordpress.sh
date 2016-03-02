@@ -7,12 +7,10 @@ $1: TESTING WORDPRESS EXAMPLE
 
 docker build -t projectatomic/mariadb-centos7-atomicapp \
   -f nulecule-library/mariadb-centos7-atomicapp/Dockerfile \
-  --no-cache \
   nulecule-library/mariadb-centos7-atomicapp/
 
 docker build -t wordpress \
   -f nulecule-library/wordpress-centos7-atomicapp/Dockerfile \
-  --no-cache \
   nulecule-library/wordpress-centos7-atomicapp/
 
 run_wordpress() {
@@ -28,11 +26,22 @@ run_wordpress() {
   db_name = foo
   " >> answers.conf
   mkdir build
-  atomic run wordpress --provider=$1 -a answers.conf -v --destination=build
+  atomic run wordpress --provider=$1 \
+    -a answers.conf -v --destination=build --logtype=nocolor
 }
 
 stop_wordpress() {
-  atomic stop wordpress --provider=$1 -v build/
+  # Workaround atomic cli bug prior to 1.8 so we must determine if the
+  # version of atomic cli is at least 1.8. Do this by comparing the
+  # atomic cli version with "1.8". If the lesser version is "1.8"
+  # then the version we are using is >= "1.8".
+  atomicversion=$(atomic --version)
+  lesserversion=$(echo -e "${atomicversion}\n1.8" | sort -V | head -n 1)
+  if [ "$lesserversion" != '1.8' ]; then
+    atomicapp stop -v build/
+  else
+    atomic stop wordpress -v build/
+  fi
 
   # Remove Docker-provider-specific containers
   if [[ $1 == "docker" ]]; then

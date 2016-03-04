@@ -67,7 +67,7 @@ rlJournalStart
         # check openshift service state
         rlRun "vagrant ssh -c 'systemctl status openshift.service | grep enabled'" \
             0 "Service openshift should be enabled"
-        rlRun "vagrant ssh -c 'systemctl status openshift.service | grep \\\"active (running)\\\"'" \
+        rlRun "vagrant ssh -c 'systemctl status openshift.service'" \
             0 "Service openshift should be running"
       if [ $? == 0 ]; then # test only if openshift is running, otherwise skip
 

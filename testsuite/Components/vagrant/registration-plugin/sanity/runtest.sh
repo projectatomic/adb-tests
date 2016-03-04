@@ -36,6 +36,7 @@
 #    vagrant_RHN_PASSWORD ... password for registration
 #    vagrant_RHN_SERVER_URL ... server for registration
 
+vagrant_RHN_SERVER_URL=${vagrant_RHN_SERVER_URL:-"subscription.rhn.redhat.com"}
 vagrant_RHN_SERVICE_URL="https://$vagrant_RHN_SERVER_URL/subscription"
 
 set -o pipefail

@@ -23,9 +23,9 @@ stop_helloapache() {
   atomicversion=$(atomic --version)
   lesserversion=$(echo -e "${atomicversion}\n1.8" | sort -V | head -n 1)
   if [ "$lesserversion" != '1.8' ]; then
-    atomicapp stop -v build/
+    atomicapp stop -v --logtype=nocolor build/
   else
-    atomic stop projectatomic/helloapache -v build/
+    atomic stop projectatomic/helloapache -v --logtype=nocolor build/
   fi
 
   # Wait for k8s/oc containers to finish terminating

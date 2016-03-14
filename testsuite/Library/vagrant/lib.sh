@@ -374,6 +374,28 @@ vagrantRegistrationCredentialsProvided() {
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+true <<'=cut'
+=pod
+
+=head2 vagrantBoxHostname
+
+Connects to box and print it's hostname.
+
+    vagrantBoxHostname
+
+=over
+
+=back
+
+=cut
+
+vagrantBoxHostname() {
+        hostname=`vagrant ssh -c "hostname" | grep -o '\b.*\b'`
+        echo "$hostname"
+}
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 true <<'=cut'

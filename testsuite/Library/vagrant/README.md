@@ -125,6 +125,12 @@ Check if registration credentials are provided in variables vagrant\_RHN\_USERNA
 
 Returns 0 when the username and password for registration plugin are provided, non-zero otherwise.
 
+## vagrantBoxHostname
+
+Connects to box and print it's hostname.
+
+    vagrantBoxHostname
+
 ## vagrantConfigureGeneralVagrantfile 
 
 Configure main Vagrantfile (in ~/.vagrant.d).

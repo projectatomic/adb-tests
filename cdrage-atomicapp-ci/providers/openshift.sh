@@ -74,12 +74,33 @@ answers_openshift() {
   echo "OpenShift Origin answers file located at $PWD"
 }
 
+# Use docker openshift container to get oc (assuming host doesn't have it)
+wait_openshift() {
+  echo "Waiting for oc po/svc/rc to finish terminating..."
+  docker exec -it origin oc get po,svc,rc
+  sleep 3 # give kubectl chance to catch up to api call
+  while [ 1 ]
+  do
+    oc=`docker exec -it origin oc get po,svc,rc | grep Terminating`
+    if [[ $oc == "" ]]
+    then
+      echo "oc po/svc/rc terminated!"
+      break
+    else
+      echo "..."
+    fi
+    sleep 1
+  done
+}
+
 if [[ $1 == "answers" ]]; then
   answers_openshift
 elif [[ $1 == "start" ]]; then
   start_openshift
 elif [[ $1 == "stop" ]]; then
   stop_openshift
+elif [[ $1 == "wait" ]]; then
+  wait_openshift 
 else
-  echo $"Usage: openshift.sh {answers|start|stop}"
+  echo $"Usage: openshift.sh {answers|start|stop|wait}"
 fi

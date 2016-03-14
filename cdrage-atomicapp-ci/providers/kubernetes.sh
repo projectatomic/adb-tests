@@ -61,6 +61,24 @@ stop_k8s() {
   done
 }
 
+wait_k8s() {
+  echo "Waiting for k8s po/svc/rc to finish terminating..."
+  kubectl get po,svc,rc
+  sleep 3 # give kubectl chance to catch up to api call
+  while [ 1 ]
+  do
+    k8s=`kubectl get po,svc,rc | grep Terminating`
+    if [[ $k8s == "" ]]
+    then
+      echo "k8s po/svc/rc terminated!"
+      break
+    else
+      echo "..."
+    fi
+    sleep 1
+  done
+}
+
 answers_k8s() {
   echo "
   ##########
@@ -78,6 +96,8 @@ elif [[ $1 == "start" ]]; then
   start_k8s
 elif [[ $1 == "stop" ]]; then
   stop_k8s
+elif [[ $1 == "wait" ]]; then
+  wait_k8s
 else
-  echo $"Usage: kubernetes.sh {answers|start|stop}"
+  echo $"Usage: kubernetes.sh {answers|start|stop|wait}"
 fi

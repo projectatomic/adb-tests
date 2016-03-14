@@ -192,11 +192,11 @@ openshiftWait4deploy () {
     while [ $cnt != $2 ]; do
         cnt=$((cnt+1))
         # TODO: check timeout more precisely, vagrant ssh os long operation
-        vagrant ssh -c "oc describe dc/$1 | grep '[0-9]\+ Running / 0 Waiting / 0 Succeeded / 0 Failed'"
+        vagrant ssh -c "oc describe $1 | grep '[0-9]\+ Running / 0 Waiting / 0 Succeeded / 0 Failed'"
         if [ $? == 0 ]; then
-            vagrant ssh -c "oc get builds | grep \"$1\"" # for more usefull log
-            vagrant ssh -c "oc describe dc/$1"
-            pods=`vagrant ssh -c "oc describe dc/$1" | grep 'Pods Status' | awk '{print $3}' | grep -o '[0-9]\+'`
+            #vagrant ssh -c "oc get builds | grep \"$1\"" # for more usefull log
+            vagrant ssh -c "oc describe $1"
+            pods=`vagrant ssh -c "oc describe $1" | grep 'Pods Status' | awk '{print $3}' | grep -o '[0-9]\+'`
             rlLog "Application \"$1\" is deployed in $pods pod(s)"
             return 0
         fi

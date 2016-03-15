@@ -28,24 +28,11 @@ stop_helloapache() {
     atomic stop projectatomic/helloapache -v build/
   fi
 
-  # Wait for k8s containers to finish terminating
-  # will change in the future to something in providers/kubernetes.sh
+  # Wait for k8s/oc containers to finish terminating
   if [[ $1 == "kubernetes" ]]; then
-    echo "Waiting for k8s po/svc/rc to finish terminating..."
-    kubectl get po,svc,rc
-    sleep 3 # give kubectl chance to catch up to api call
-    while [ 1 ]
-    do
-      k8s=`kubectl get po,svc,rc | grep Terminating`
-      if [[ $k8s == "" ]]
-      then
-        echo "k8s po/svc/rc terminated!"
-        break
-      else
-        echo "..."
-      fi
-      sleep 1
-    done
+    ./providers/kubernetes.sh wait
+  elif [[ $1 == "openshift" ]]; then
+    ./providers/openshift.sh wait
   fi
 }
 

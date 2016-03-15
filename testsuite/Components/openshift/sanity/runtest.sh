@@ -73,10 +73,10 @@ rlJournalStart
 
         # oc login, new project, new app, expose
         openshiftLogin openshift-dev devel
-        rlRun "vagrant ssh -c 'oc new-project test_ruby'"
+        rlRun "vagrant ssh -c 'oc new-project test-ruby'"
         rlRun "vagrant ssh -c 'oc new-app openshift/ruby-20-centos7~https://github.com/openshift/ruby-hello-world.git'"
         rlRun "openshiftWait4build ruby-hello-world 7"   # timeout 5m
-        rlRun "openshiftWait4deploy ruby-hello-world 10" # timeout 10s
+        rlRun "openshiftWait4deploy dc/ruby-hello-world 10" # timeout 10s
         rlRun "vagrant ssh -c 'oc expose service/ruby-hello-world --hostname rhw.10.1.2.2.xip.io'"
         sleep 5
 

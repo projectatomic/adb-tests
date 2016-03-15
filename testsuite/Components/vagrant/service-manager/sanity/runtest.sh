@@ -32,7 +32,7 @@
 
 rlJournalStart
     rlPhaseStartSetup
-        rlImport 'testsuite/vagrant'
+        rlImport 'testsuite/vagrant' || rlDie
         vagrantBoxIsProvided || rlDie
         vagrantBoxAdd || rlDie
         vagrantPluginInstall vagrant-service-manager
@@ -65,6 +65,8 @@ for dir in $vagrant_VAGRANTFILE_DIRS;do
         rlLogInfo "Testing with running VM"
         rlRun "vagrant up --provider $vagrant_PROVIDER"
         rlRun "vagrant ssh -c 'echo hello' | grep hello"
+bash
+        rlLogInfo "Testing env docker"
         rlRun "vagrant service-manager env docker > stdout 2> stderr"
         echo -e "stdout:\n========"
         cat stdout
@@ -72,11 +74,30 @@ for dir in $vagrant_VAGRANTFILE_DIRS;do
         cat stderr
         echo "========"
         rlAssertNotGrep "." stderr
-        rlAssertGrep "DOCKER_HOST=tcp://[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*:[0-9]*" stdout
-        rlAssertGrep "DOCKER_CERT_PATH=.*\.docker" stdout
-        rlAssertGrep "DOCKER_TLS_VERIFY=1" stdout
-        rlAssertGrep "DOCKER_MACHINE_NAME=[0-9a-f]*" stdout
-        rlAssertGrep 'eval "$(vagrant adbinfo)' stdout
+        rlAssertGrep "DOCKER_HOST.tcp://[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*:[0-9]*" stdout
+        if [ "$HOST_PLATFORM" == "win" ]; then
+            set -x
+            rlAssertGrep "DOCKER_CERT_PATH.*\.vagrant\\\\machines\\\\default\\\\${vagrant_PROVIDER}\\\\docker" stdout
+            set +x
+        else
+            rlAssertGrep "DOCKER_CERT_PATH.*\.vagrant/machines/default/${vagrant_PROVIDER}/docker" stdout
+        fi
+        rlAssertGrep "DOCKER_TLS_VERIFY.1" stdout
+        rlAssertGrep "DOCKER_MACHINE_NAME.[0-9a-f]*" stdout
+        rlAssertNotGrep "setx" stdout
+        rlAssertGrep "export" stdout
+        rlAssertGrep 'eval "$(vagrant service-manager env docker)' stdout
+
+        rlLogInfo "Testing env openshift"
+        rlRun "vagrant service-manager env openshift > stdout 2> stderr"
+        echo -e "stdout:\n========"
+        cat stdout
+        echo -e "stderr:\n========"
+        cat stderr
+        echo "========"
+        rlAssertNotGrep "." stderr
+        rlAssertGrep "https://[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+:[0-9]\+/console" stdout
+        rlAssertGrep "oc login https://[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+:[0-9]\+" stdout
 
         rlRun "vagrant destroy -f"
         rlRun "popd"

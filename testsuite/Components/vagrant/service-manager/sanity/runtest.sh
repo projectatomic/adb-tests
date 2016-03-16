@@ -65,7 +65,7 @@ for dir in $vagrant_VAGRANTFILE_DIRS;do
         rlLogInfo "Testing with running VM"
         rlRun "vagrant up --provider $vagrant_PROVIDER"
         rlRun "vagrant ssh -c 'echo hello' | grep hello"
-bash
+
         rlLogInfo "Testing env docker"
         rlRun "vagrant service-manager env docker > stdout 2> stderr"
         echo -e "stdout:\n========"

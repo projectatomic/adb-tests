@@ -41,9 +41,9 @@ stop_etherpad() {
   atomicversion=$(atomic --version)
   lesserversion=$(echo -e "${atomicversion}\n1.8" | sort -V | head -n 1)
   if [ "$lesserversion" != '1.8' ]; then
-    atomicapp stop -v build/
+    atomicapp stop -v --logtype=nocolor build/
   else
-    atomic stop etherpad -v build/
+    atomic stop etherpad -v --logtype=nocolor build/
   fi
 
   # Remove Docker-provider-specific containers

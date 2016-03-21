@@ -1,0 +1,118 @@
+# Custom builder. The python script will
+#   - request duffy instances
+#   - ssh to them, git clone $GIT_REPO_URL
+#   - execute $TEST_CMD on them
+- builder:
+    name: centos-ci-bootstrap
+    builders:
+        - python:
+            !include-raw './run.py'
+
+# Custom Trigger. Sets up the Github pull request trigger
+# Accepts a parameter {provider}
+- trigger:
+    name: custom-trigger
+    triggers:
+        - github-pull-request:
+            admin-list:
+              - dustymabe
+              - cdrage
+              - rtnpro
+              - kadel
+            white-list:
+              - dustymabe
+              - cdrage
+              - rtnpro
+              - kadel
+            build-desc-template: "build description"
+            trigger-phrase: '#dotests|#dotest{provider}'
+            only-trigger-phrase: true
+            github-hooks: true
+            permit-all: false
+            auto-close-on-fail: false
+            status-context: "{provider} tests"
+            started-status: "centos-ci {provider} test started"
+            success-status: "centos-ci {provider} test succeeded"
+            failure-status: "centos-ci {provider} test failed"
+            error-status: "centos-ci {provider} test errored"
+            build-desc-template: ''
+
+# Custom Publisher for sending email
+- publisher:
+    name: custom-publisher-email
+    publishers:
+        - email:
+            recipients: 'container-tools@redhat.com'
+
+# Custom Publisher for irc notifications
+- publisher:
+    name: custom-publisher-irc
+    publishers:
+        - ircbot:
+            strategy: all
+            channels:
+                - name: '#nulecule'
+# Custom SCM section for our git repo
+- scm:
+    name: custom-scm-git
+    scm: 
+      - git:
+          url: https://github.com/projectatomic/atomicapp.git
+          git-tool: ci-git
+          wipe-workspace: false
+          skip-tag: true
+          clean:
+            after: true
+          credentials-id: 1d7dba44-5b34-42b3-886c-4d659ffb2aae
+
+# job template for each provider to test against master
+- job-template:
+    name: '{name}-{provider}-master'
+    # restrict to nodes that are set up for atomicapp
+    node: atomicapp-shared
+    publishers:
+        - custom-publisher-email
+        - custom-publisher-irc
+    builders:
+        - inject:
+            properties-content: |
+                #GIT_REPO_URL=https://github.com/dustymabe/adb-tests.git
+                GIT_REPO_URL=https://github.com/projectatomic/adb-tests.git
+                MACHINE_COUNT=1
+                TEST_CMD='cd cdrage-atomicapp-ci/ && make install {provider} ATOMIC_SOURCE=rpm'
+        - centos-ci-bootstrap
+
+# job template for each provider to test PRs using GHPRB
+- job-template:
+    name: '{name}-{provider}-pr'
+    # restrict to nodes set up for atomicapp
+    node: atomicapp-shared
+    properties:
+        - github:
+            url: https://github.com/projectatomic/atomicapp
+    triggers:
+        - custom-trigger:
+            provider: "{provider}"
+    publishers:
+        - custom-publisher-email
+        - custom-publisher-irc
+    builders:
+        - inject:
+            properties-content: |
+                PROVIDER={provider}
+                #GIT_REPO_URL=https://github.com/dustymabe/adb-tests.git
+                GIT_REPO_URL=https://github.com/projectatomic/adb-tests.git
+                MACHINE_COUNT=1
+                TEST_CMD='cd cdrage-atomicapp-ci/ && make install {provider} ATOMICAPP_PR=$ghprbPullId ATOMIC_SOURCE=rpm'
+        - centos-ci-bootstrap
+
+# create the jobs using the job templates
+- project:
+    name: atomicapp-test
+    provider:
+        - docker
+        - kubernetes
+        - openshift
+    jobs:
+      - '{name}-{provider}-pr'
+      - '{name}-{provider}-master'

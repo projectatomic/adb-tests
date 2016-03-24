@@ -79,7 +79,7 @@
                 #GIT_REPO_URL=https://github.com/dustymabe/adb-tests.git
                 GIT_REPO_URL=https://github.com/projectatomic/adb-tests.git
                 MACHINE_COUNT=1
-                TEST_CMD='cd cdrage-atomicapp-ci/ && make install {provider} ATOMIC_SOURCE=rpm'
+                TEST_CMD='cd cdrage-atomicapp-ci/functional-tests/ && make install {provider} ATOMIC_SOURCE=rpm'
         - centos-ci-bootstrap
 
 # job template for each provider to test PRs using GHPRB
@@ -93,9 +93,6 @@
     triggers:
         - custom-trigger:
             provider: "{provider}"
-    publishers:
-        - custom-publisher-email
-        - custom-publisher-irc
     builders:
         - inject:
             properties-content: |
@@ -103,7 +100,7 @@
                 #GIT_REPO_URL=https://github.com/dustymabe/adb-tests.git
                 GIT_REPO_URL=https://github.com/projectatomic/adb-tests.git
                 MACHINE_COUNT=1
-                TEST_CMD='cd cdrage-atomicapp-ci/ && make install {provider} ATOMICAPP_PR=$ghprbPullId ATOMIC_SOURCE=rpm'
+                TEST_CMD='cd cdrage-atomicapp-ci/functional-tests/ && make install {provider} ATOMICAPP_PR=$ghprbPullId ATOMIC_SOURCE=rpm'
         - centos-ci-bootstrap
 
 # create the jobs using the job templates

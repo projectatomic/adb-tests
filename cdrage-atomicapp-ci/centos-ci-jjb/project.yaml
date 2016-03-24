@@ -93,9 +93,6 @@
     triggers:
         - custom-trigger:
             provider: "{provider}"
-    publishers:
-        - custom-publisher-email
-        - custom-publisher-irc
     builders:
         - inject:
             properties-content: |

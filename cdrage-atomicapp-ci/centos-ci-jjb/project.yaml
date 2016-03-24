@@ -6,7 +6,8 @@
     name: centos-ci-bootstrap
     builders:
         - python:
-            !include-raw './run.py'
+            !include-raw:
+                - ./run.py
 
 # Custom Trigger. Sets up the Github pull request trigger
 # Accepts a parameter {provider}
@@ -26,7 +27,7 @@
               - kadel
             build-desc-template: "build description"
             trigger-phrase: '#dotests|#dotest{provider}'
-            only-trigger-phrase: true
+            only-trigger-phrase: {only-trigger-phrase}
             github-hooks: true
             permit-all: false
             auto-close-on-fail: false
@@ -64,22 +65,31 @@
           clean:
             after: true
           credentials-id: 1d7dba44-5b34-42b3-886c-4d659ffb2aae
+          refspec: "{refspec}"
+          branches:
+              - "{branch}"
 
 # job template for each provider to test against master
 - job-template:
     name: '{name}-{provider}-master'
     # restrict to nodes that are set up for atomicapp
     node: atomicapp-shared
+    properties:
+        - github:
+            url: "{git_repo_url}"
+    scm:
+        - custom-scm-git:
+            refspec: "{refspec}"
+            branch: "master"
     publishers:
         - custom-publisher-email
         - custom-publisher-irc
     builders:
         - inject:
             properties-content: |
-                #GIT_REPO_URL=https://github.com/dustymabe/adb-tests.git
-                GIT_REPO_URL=https://github.com/projectatomic/adb-tests.git
+                GIT_REPO_URL="{git_repo_url}"
                 MACHINE_COUNT=1
-                TEST_CMD='cd cdrage-atomicapp-ci/ && make install {provider} ATOMIC_SOURCE=rpm'
+                TEST_CMD='{test_cmd_master}'
         - centos-ci-bootstrap
 
 # job template for each provider to test PRs using GHPRB
@@ -89,10 +99,16 @@
     node: atomicapp-shared
     properties:
         - github:
-            url: https://github.com/projectatomic/atomicapp
+            url: "{git_repo_url}"
+    scm:
+        - custom-scm-git:
+            refspec: "{refspec}"
+            branch: "{branch}"
     triggers:
         - custom-trigger:
             provider: "{provider}"
+            only-trigger-phrase: {only-trigger-false}
+
     publishers:
         - custom-publisher-email
         - custom-publisher-irc
@@ -100,10 +116,9 @@
         - inject:
             properties-content: |
                 PROVIDER={provider}
-                #GIT_REPO_URL=https://github.com/dustymabe/adb-tests.git
-                GIT_REPO_URL=https://github.com/projectatomic/adb-tests.git
+                GIT_REPO_URL="{git_repo_url}"
                 MACHINE_COUNT=1
-                TEST_CMD='cd cdrage-atomicapp-ci/ && make install {provider} ATOMICAPP_PR=$ghprbPullId ATOMIC_SOURCE=rpm'
+                TEST_CMD = '{test_cmd}'
         - centos-ci-bootstrap
 
 # create the jobs using the job templates
@@ -113,6 +128,18 @@
         - docker
         - kubernetes
         - openshift
+        - unittest:
+            git_repo_url: "https://github.com/projectatomic/atomicapp"
+            refspec: "+refs/pull/*:refs/remotes/origin/pr/*"
+            branch: "${{sha1}}"
+            test_cmd_master: 'make test'
+            test_cmd: 'make test'
+    refspec: ""
+    branch: ""
+    only-trigger-phrase: true
+    git_repo_url: https://github.com/projectatomic/adb-tests.git
+    test_cmd: 'cd cdrage-atomicapp-ci/ && make install {provider} ATOMICAPP_PR=$ghprbPullId ATOMIC_SOURCE=rpm'
+    test_cmd_master: 'cd cdrage-atomicapp-ci/ && make install {provider} ATOMIC_SOURCE=rpm'
     jobs:
       - '{name}-{provider}-pr'
       - '{name}-{provider}-master'

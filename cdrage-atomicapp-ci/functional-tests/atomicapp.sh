@@ -1,4 +1,5 @@
 #!/bin/bash
+set -ex
 
 LINK="https://github.com/projectatomic/atomicapp"
 UPSTREAM="projectatomic/atomicapp"

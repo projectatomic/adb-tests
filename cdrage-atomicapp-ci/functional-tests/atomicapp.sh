@@ -19,13 +19,8 @@ install_atomicapp() {
   if [ "$1" ]
     then
       echo "USING PR: $1"
-      BRANCH_NAME=`curl -s "https://api.github.com/repos/${UPSTREAM}/pulls/${1}" | python -c 'import json,sys;obj=json.load(sys.stdin);print obj["head"]["ref"]'`
-      USERS_NAME=`curl -s "https://api.github.com/repos/${UPSTREAM}/pulls/${1}" | python -c 'import json,sys;obj=json.load(sys.stdin);print obj["head"]["user"]["login"]'`
-      echo "User's name: " $USERS_NAME
-      echo "Pull-request: " $1
-      echo "Pull-request branch name: " $BRANCH_NAME
-      git checkout -b $1-$USERS_NAME-$BRANCH_NAME
-      curl -s "https://patch-diff.githubusercontent.com/raw/${UPSTREAM}/pull/${1}.patch" | git am
+      git fetch origin pull/$1/head:PR_$1
+      git checkout PR_$1
   fi
 
   # Test first :)

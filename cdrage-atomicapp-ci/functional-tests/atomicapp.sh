@@ -24,9 +24,6 @@ install_atomicapp() {
       git checkout PR_$1
   fi
 
-  # Test first :)
-  make test
-
   # Install
   make install
 

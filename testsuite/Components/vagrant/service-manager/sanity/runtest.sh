@@ -83,10 +83,14 @@ for dir in $vagrant_VAGRANTFILE_DIRS;do
             rlAssertGrep "DOCKER_CERT_PATH.*\.vagrant/machines/default/${vagrant_PROVIDER}/docker" stdout
         fi
         rlAssertGrep "DOCKER_TLS_VERIFY.1" stdout
-        rlAssertGrep "DOCKER_MACHINE_NAME.[0-9a-f]*" stdout
+        rlAssertGrep "DOCKER_API_VERSION.[0-9]\.[0-9]\+" stdout
         rlAssertNotGrep "setx" stdout
         rlAssertGrep "export" stdout
-        rlAssertGrep 'eval "$(vagrant service-manager env docker)' stdout
+        if [ "$HOST_PLATFORM" == "win" ]; then
+            rlAssertGrep "eval \"\$(VAGRANT_NO_COLOR=1 vagrant service-manager env docker \| tr -d '\r')\"" stdout
+        else
+            rlAssertGrep 'eval "$(vagrant service-manager env docker)' stdout
+        fi
 
         rlLogInfo "Testing env openshift"
         rlRun "vagrant service-manager env openshift > stdout 2> stderr"
@@ -98,6 +102,29 @@ for dir in $vagrant_VAGRANTFILE_DIRS;do
         rlAssertNotGrep "." stderr
         rlAssertGrep "https://[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+:[0-9]\+/console" stdout
         rlAssertGrep "oc login https://[0-9]\+\.[0-9]\+\.[0-9]\+\.[0-9]\+:[0-9]\+" stdout
+
+        rlLogInfo "Testing box version"
+        rlRun "vagrant service-manager box version > stdout 2> stderr"
+        echo -e "stdout:\n========"
+        cat stdout
+        echo -e "stderr:\n========"
+        cat stderr
+        echo "========"
+        rlAssertNotGrep "." stderr
+        rlLogInfo "`cat stdout`"
+        rlAssertGrep "." stdout
+
+        rlLogInfo "Testing box version --scritp-readable"
+        rlRun "vagrant service-manager box version --script-readable> stdout 2> stderr"
+        echo -e "stdout:\n========"
+        cat stdout
+        echo -e "stderr:\n========"
+        cat stderr
+        echo "========"
+        rlAssertNotGrep "." stderr
+        rlAssertGrep "VARIANT=\".\+\"" stdout
+        rlAssertGrep "VARIANT_ID=\".\+\"" stdout
+        rlAssertGrep "VARIANT_VERSION=\".\+\"" stdout
 
         rlRun "vagrant destroy -f"
         rlRun "popd"

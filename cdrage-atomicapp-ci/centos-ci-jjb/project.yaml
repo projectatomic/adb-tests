@@ -92,6 +92,8 @@
 # job template for each provider to test PRs using GHPRB
 - job-template:
     name: '{name}-{provider}-pr'
+    # Enable multiple PR builds to run in parallel
+    concurrent: true
     # restrict to nodes set up for atomicapp
     node: atomicapp-shared
     properties:

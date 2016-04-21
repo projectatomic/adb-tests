@@ -72,6 +72,9 @@
 # job template for each provider to test against master
 - job-template:
     name: '{name}-{provider}-master'
+    # run once a day for now - TODO: build on every push to master 
+    triggers:
+        - timed: '@daily'
     # restrict to nodes that are set up for atomicapp
     node: atomicapp-shared
     publishers:

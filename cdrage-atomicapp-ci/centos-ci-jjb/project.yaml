@@ -19,11 +19,15 @@
               - cdrage
               - rtnpro
               - kadel
+              - surajssd
+              - containscafeine
             white-list:
               - dustymabe
               - cdrage
               - rtnpro
               - kadel
+              - surajssd
+              - containscafeine
             build-desc-template: "build description"
             trigger-phrase: '#dotests|#dotest{provider}'
             only-trigger-phrase: true
@@ -42,7 +46,7 @@
     name: custom-publisher-email
     publishers:
         - email:
-            recipients: 'container-tools@redhat.com'
+            recipients: 'dusty@dustymabe.com,cdrage@redhat.com'
 
 # Custom Publisher for irc notifications
 - publisher:
@@ -68,6 +72,9 @@
 # job template for each provider to test against master
 - job-template:
     name: '{name}-{provider}-master'
+    # run once a day for now - TODO: build on every push to master 
+    triggers:
+        - timed: '@daily'
     # restrict to nodes that are set up for atomicapp
     node: atomicapp-shared
     publishers:
@@ -85,6 +92,8 @@
 # job template for each provider to test PRs using GHPRB
 - job-template:
     name: '{name}-{provider}-pr'
+    # Enable multiple PR builds to run in parallel
+    concurrent: true
     # restrict to nodes set up for atomicapp
     node: atomicapp-shared
     properties:

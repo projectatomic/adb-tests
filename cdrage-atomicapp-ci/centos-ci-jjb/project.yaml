@@ -19,11 +19,15 @@
               - cdrage
               - rtnpro
               - kadel
+              - surajssd
+              - containscafeine
             white-list:
               - dustymabe
               - cdrage
               - rtnpro
               - kadel
+              - surajssd
+              - containscafeine
             build-desc-template: "build description"
             trigger-phrase: '#dotests|#dotest{provider}'
             only-trigger-phrase: true

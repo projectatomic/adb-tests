@@ -1,0 +1,59 @@
+- job:
+    name: adb-openshift-vagrantfile-tests
+    node: atomic-sig
+    properties:
+        - github:
+            url: https://github.com/projectatomic/adb-atomic-developer-bundle
+    publishers:
+        - email:
+            recipients: dshah@redhat.com
+        - github-notifier
+    builders:
+        - inject:
+            properties-content: |
+                MACHINE_COUNT=1
+                GIT_REPO_URL='https://github.com/projectatomic/adb-tests.git'
+                ANSIBLE_REPO_URL='https://github.com/dharmit/adb-ci-ansible'
+                TEST_CMD=cd /root/adb-tests&& git checkout adb-fix-195-unittest && cd adb-vagrantfile-tests/openshift-tests && scl enable sclo-vagrant1 'bash -c "./test-openshift.py"'
+        - centos-ci-bootstrap
+    scm:
+        - custom-scm
+    triggers:
+        - custom-trigger
+
+- builder:
+    name: centos-ci-bootstrap
+    builders:
+        - python:
+            !include-raw: './run.py'
+
+- trigger:
+    name: custom-trigger
+    triggers:
+        - github-pull-request:
+            admin-list:
+                - dharmit
+                - LalatenduMohanty
+                - navidshaikh
+                - praveenkumar
+                - bexelbie
+            trigger-phrase: '#buildopenshift|#buildall'
+            only-trigger-phrase: true
+            permit-all: false
+            github-hooks: true
+            started-status: "Executing OpenShift tests on CentOS CI"
+            success-status: "Successfully tested OpenShift custom Vagrantfile"
+            failure-status: "OpenShift tests failed"
+            status-context: "OpenShift custom Vagrantfile tests"
+# GitHub repo info
+- scm:
+    name: custom-scm
+    scm:
+        - git:
+            git-tool: ci-git
+            url: https://github.com/projectatomic/adb-atomic-developer-bundle
+            wipe-workspace: false
+            refspec: +refs/pull/*:refs/remotes/origin/pr/*
+            skip-tag: true
+            branches:
+                - ${sha1}

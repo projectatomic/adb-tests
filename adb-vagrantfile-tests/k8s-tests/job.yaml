@@ -14,7 +14,7 @@
                 MACHINE_COUNT=1
                 GIT_REPO_URL='https://github.com/projectatomic/adb-tests.git'
                 ANSIBLE_REPO_URL='https://github.com/dharmit/adb-ci-ansible'
-                TEST_CMD=cd /root/adb-tests && git checkout adb-fix-195-unittest && cd adb-vagrantfile-tests/k8s-tests && scl enable sclo-vagrant1 'bash -c "./test-k8s.py"'
+                TEST_CMD=cd /root/adb-tests && cd adb-vagrantfile-tests/k8s-tests && scl enable sclo-vagrant1 'bash -c "./test-k8s.py"'
         - centos-ci-bootstrap
     scm:
         - custom-scm

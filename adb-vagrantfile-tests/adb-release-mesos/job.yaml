@@ -1,0 +1,30 @@
+- job:
+    name: adb-release-mesos
+    node: atomic-sig
+    properties:
+        - github:
+            url: https://github.com/projectatomic/adb-atomic-developer-bundle
+    publishers:
+        - email:
+            recipients: dshah@redhat.com
+
+    parameters:
+        - string:
+            name: libvirtbox
+            default: http://cbs.centos.org/kojifiles/work/tasks/7015/87015/centos-7-adb-2.0-0.x86_64.rhevm.ova
+            description: Vagrant box for libvirt provider
+
+    builders:
+        - inject:
+            properties-content: |
+                MACHINE_COUNT=1
+                GIT_REPO_URL='https://github.com/dharmit/adb-tests.git'
+                ANSIBLE_REPO_URL='https://github.com/dharmit/adb-ci-ansible'
+                TEST_CMD=cd /root/adb-tests/adb-vagrantfile-tests && git checkout adb-release-mesos && cd adb-release-mesos && scl enable sclo-vagrant1 'bash -c "./test-new-build-mesos.py"'
+        - centos-ci-bootstrap
+
+- builder:
+    name: centos-ci-bootstrap
+    builders:
+        - python:
+            !include-raw: './run.py'

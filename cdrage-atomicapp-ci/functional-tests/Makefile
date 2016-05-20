@@ -1,6 +1,10 @@
 PROVIDER := "docker"
 ACTION := "run"
 
+# Env variables
+export USER := root
+export SUDO_USER := root
+
 install:
 	# Fixups depending on what system we are on
 	./prepare.sh install

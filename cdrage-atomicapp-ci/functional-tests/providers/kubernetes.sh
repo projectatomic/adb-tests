@@ -14,34 +14,39 @@ start_k8s() {
   fi
 
   # Use alpha for now since this contains the new hyperkube format going forward
-  K8S_VERSION=1.2.2
+  K8S_VERSION=1.2.3
   docker run \
-  --volume=/:/rootfs:ro \
-  --volume=/sys:/sys:ro \
-  --volume=/var/lib/docker/:/var/lib/docker:rw \
-  --volume=/var/lib/kubelet/:/var/lib/kubelet:rw \
-  --volume=/var/run:/var/run:rw \
-  --net=host \
-  --pid=host \
-  --privileged=true \
-  -d \
-  gcr.io/google_containers/hyperkube-amd64:v${K8S_VERSION} \
-  /hyperkube kubelet \
-      --containerized \
-      --hostname-override="127.0.0.1" \
-      --address="0.0.0.0" \
-      --api-servers=http://localhost:8080 \
-      --config=/etc/kubernetes/manifests \
-      --cluster-dns=10.0.0.10 \
-      --cluster-domain=cluster.local \
-      --allow-privileged=true --v=2
-
+    --volume=/:/rootfs:ro \
+    --volume=/sys:/sys:ro \
+    --volume=/var/lib/docker/:/var/lib/docker:rw \
+    --volume=/var/lib/kubelet/:/var/lib/kubelet:rw \
+    --volume=/var/run:/var/run:rw \
+    --net=host \
+    --pid=host \
+    --privileged=true \
+    --name=kubelet \
+    -d \
+    gcr.io/google_containers/hyperkube-amd64:v${K8S_VERSION} \
+    /hyperkube kubelet \
+    --containerized \
+    --hostname-override="127.0.0.1" \
+    --address="0.0.0.0" \
+    --api-servers=http://localhost:8080 \
+    --config=/etc/kubernetes/manifests \
+    --cluster-dns=10.0.0.10 \
+    --cluster-domain=cluster.local \
+    --allow-privileged=true --v=2
 
   until curl 127.0.0.1:8080 &>/dev/null;
   do
-      echo ...
-      sleep 1
+    echo ...
+    sleep 1
   done
+
+  kubectl config set-cluster dev --server=http://localhost:8080
+  kubectl config set-context dev --cluster=dev --user=default
+  kubectl config use-context dev
+  kubectl config set-credentials default --token=foobar
 }
 
 

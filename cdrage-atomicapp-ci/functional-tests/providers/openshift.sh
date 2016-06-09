@@ -62,7 +62,11 @@ answers_openshift() {
   docker exec -it origin oc config set-context openshift --cluster=openshift1 --user=openshift
   docker exec -it origin oc config use-context openshift
   docker exec -it origin oc config set contexts.openshift.namespace foo
+
+  # A delay is required on slower-systems for OpenShift to "catch up" to the API call of a new project being created
+  sleep 3
   docker exec -it origin oc new-project foo
+  sleep 3
 
   echo "[general]
   provider = openshift

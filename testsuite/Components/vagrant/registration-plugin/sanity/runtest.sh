@@ -147,6 +147,8 @@ if vagrantRegistrationCredentialsProvided;then
 
     rlPhaseStartTest credentials_in_vagrantfile
         vagrantConfigureGeneralVagrantfile "file"
+        unset SUB_USERNAME
+        unset SUB_PASSWORD
         rlRun "vagrant up --provider $vagrant_PROVIDER"
         rlRun "vagrant ssh -c 'echo hello' | grep hello"
         rlRun "vagrant ssh -c 'sudo subscription-manager status'"

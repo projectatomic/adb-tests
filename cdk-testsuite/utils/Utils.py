@@ -37,7 +37,7 @@ def settingPath(self):
     return var
 
 #This method is doing Vagrant up with the specific provider 
-def vagrantUp(self, path,provider):
+def vagrantUp(self, path):
     self.log.debug(" Vagrant up:: Start")
     self.log.debug("changing path to " + path)
     os.chdir(path)

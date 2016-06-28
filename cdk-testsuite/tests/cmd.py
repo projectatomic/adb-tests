@@ -6,7 +6,7 @@ import os
 import pexpect
 #from Logic import Utils
 
-Utils= imp.load_source('Utils', '/cygdrive/c/Users/naina/Downloads/ACDK/ACDK/Logic/Utils.py')
+Utils= imp.load_source('Utils', '../Logic/Utils.py')
 
 class cmd(Test):
 

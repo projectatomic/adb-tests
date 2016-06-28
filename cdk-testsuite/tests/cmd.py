@@ -6,7 +6,7 @@ import os
 import pexpect
 #from Logic import Utils
 
-Utils= imp.load_source('Utils', '../Logic/Utils.py')
+Utils= imp.load_source('Utils', '../libraries/vagrant/vagrant.py')
 
 class cmd(Test):
 

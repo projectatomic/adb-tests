@@ -124,18 +124,9 @@ def vagrant_box_remove(self):
     return output
 
 def vagrant_plugin_install(self):
-    try:
         self.log.info("Vagrant Plugin Install :: Start")
         os.chdir(self.params.get('vagrant_PLUGINS_DIR'))
-        #os.system("vagrant plugin install ./vagrant-registration-*.gem  ./vagrant-service-manager-*.gem ./vagrant-sshfs-*.gem")
-        p = subprocess.Popen("vagrant plugin install ./vagrant-registration-*.gem  ./vagrant-service-manager-*.gem ./vagrant-sshfs-*.gem")
-        (output, err) = p.communicate()
-        self.log.debug(output)
-        #return output
-    except:
-         self.log.info('Exception!')
-         #return output
-#    self.log.info("Vagrant Plugin Install ::Finish")
+        os.system("vagrant plugin install ./vagrant-registration-*.gem  ./vagrant-service-manager-*.gem ./vagrant-sshfs-*.gem")
 
     
 

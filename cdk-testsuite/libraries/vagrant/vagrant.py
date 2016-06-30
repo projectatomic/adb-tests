@@ -123,12 +123,27 @@ def vagrant_box_remove(self):
   #  self.log.info("Vagrant Box Remove ::Finish")
     return output
 
+'''
+Returns the exit code
+'''
 def vagrant_plugin_install(self):
         self.log.info("Vagrant Plugin Install :: Start")
         os.chdir(self.params.get('vagrant_PLUGINS_DIR'))
-        os.system("vagrant plugin install ./vagrant-registration-*.gem  ./vagrant-service-manager-*.gem ./vagrant-sshfs-*.gem")
+        code=os.system("vagrant plugin install ./vagrant-registration-*.gem  ./vagrant-service-manager-*.gem ./vagrant-sshfs-*.gem")
+        self.log.info(code)
+        return code
 
-    
+
+'''
+Returns the exit code
+'''
+def vagrant_plugin_uninstall(self):
+        self.log.info("Vagrant Plugin Install :: Start")
+        os.chdir(self.params.get('vagrant_PLUGINS_DIR'))
+        code=os.system("vagrant plugin uninstall vagrant-registration  vagrant-service-manager vagrant-sshfs")
+        self.log.info(code)
+        return code
+
 
 # This method is for multi windows shell support ,it runs the specific commands in the particalar sheels 
 def shell_commands(self, command):

@@ -78,7 +78,7 @@ def vagrantDestroy(self,path):
     (output, err) = p.communicate()
     self.log.debug(output)
     self.log.info('*******************8')
-    self.assertTrue('==> default: Destroying VM and associated drives' in output)
+    #self.assertTrue('==> default: Destroying VM and associated drives' in output)
 	#self.log.info(dash + " vagrant destroy ::Exit" + dash)
     return output,err
 
@@ -107,12 +107,9 @@ def vagrant_box_add(self):
     self.log.info("Vagrant Box add :: Start")
     if os.path.isfile(self.params.get('vagrant_BOX_PATH')) ==True:
         pass
-    p = subprocess.Popen('vagrant box add cdkv3 '+ str(self.params.get('vagrant_BOX_PATH')))
+    p = subprocess.Popen('vagrant box add cdkv2 '+ str(self.params.get('vagrant_BOX_PATH')))
     (output, err) = p.communicate()
     self.log.debug(output)
-    self.assertTrue('Successfully added box' in output)
-    
- #   self.log.info("Vagrant Box add ::Finish")
     return output
 
 def vagrant_box_remove(self):
@@ -123,46 +120,43 @@ def vagrant_box_remove(self):
   #  self.log.info("Vagrant Box Remove ::Finish")
     return output
 
-'''
-Returns the exit code
-'''
 def vagrant_plugin_install(self):
+    try:
         self.log.info("Vagrant Plugin Install :: Start")
         os.chdir(self.params.get('vagrant_PLUGINS_DIR'))
-        code=os.system("vagrant plugin install ./vagrant-registration-*.gem  ./vagrant-service-manager-*.gem ./vagrant-sshfs-*.gem")
-        self.log.info(code)
-        return code
+        #os.system("vagrant plugin install ./vagrant-registration-*.gem  ./vagrant-service-manager-*.gem ./vagrant-sshfs-*.gem")
+        p = subprocess.Popen("vagrant plugin install ./vagrant-registration-*.gem  ./vagrant-service-manager-*.gem ./vagrant-sshfs-*.gem")
+        (output, err) = p.communicate()
+        self.log.debug(output)
+        #return output
+    except:
+         self.log.info('Exception!')
+         #return output
+#    self.log.info("Vagrant Plugin Install ::Finish")
 
-
-'''
-Returns the exit code
-'''
-def vagrant_plugin_uninstall(self):
-        self.log.info("Vagrant Plugin Install :: Start")
-        os.chdir(self.params.get('vagrant_PLUGINS_DIR'))
-        code=os.system("vagrant plugin uninstall vagrant-registration  vagrant-service-manager vagrant-sshfs")
-        self.log.info(code)
-        return code
-
+    
 
 # This method is for multi windows shell support ,it runs the specific commands in the particalar sheels 
 def shell_commands(self, command):
     self.log.info("This method is used because we need to provide support for Powershell , cmd, cygwin, bash,ubuntu")
     if self.params.get('Windows_Shell') == 'powershell':
         operator = '|'
-        psxmlgen = subprocess.Popen([r'C:/WINDOWS/system32/WindowsPowerShell/v1.0/powershell.exe',
-                                     'cd ' + self.params.get(
-                                         'vagrant_VARGRANTFILE_DIRS') + 'misc/hyperv/rhel-k8s-singlenode-hyperv ' + operator + ' ' + command],
-                                    cwd=os.getcwd())
-        result = psxmlgen.wait
+        shell_output = subprocess.Popen([r'C:/WINDOWS/system32/WindowsPowerShell/v1.0/powershell.exe',command],cwd=os.getcwd())
+        result = shell_output.wait
         time.sleep(20)
         self.log.debug('Suspend result :' + str(result))
+        return shell_output
     elif self.params.get('Windows_Shell') == 'cmd':
         operator = '&'
-        psxmlgen = subprocess.Popen([r'C:/Windows/System32/cmd.exe',
-                                     'cd ' + self.params.get(
-                                         'vagrant_VARGRANTFILE_DIRS') + 'misc/hyperv/rhel-k8s-singlenode-hyperv ' + operator + ' ' + command],
+        shell_output = subprocess.Popen([r'C:/Windows/System32/cmd.exe',command],
                                     cwd=os.getcwd())
-        result = psxmlgen.wait
+        result = shell_output.wait
         time.sleep(20)
         self.log.debug('Suspend result :' + str(result))
+        return shell_output
+    else:
+        os.chdir(self.params.get('vagrant_VARGRANTFILE_DIRS'))
+        shell_output = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True,cwd=os.getcwd())
+        (output, err) = shell_output.communicate()
+        self.log.debug(output)
+        return output

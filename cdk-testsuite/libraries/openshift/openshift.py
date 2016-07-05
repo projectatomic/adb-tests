@@ -10,53 +10,53 @@ import logging
 log = logging.getLogger("Openshift.Debug")
     
 def oc_usr_login(self, ip_port, uname, password):
-        '''
-        TBD
-        '''
-        strcmd = "vagrant ssh -c 'oc login " +ip_port +" --username=" +uname +" --password=" +password +" --insecure-skip-tls-verify" +"'"
-        self.log.info ("Executing : " +strcmd)
-        output = process.system_output(strcmd)
-        return output
+    '''
+    TBD
+    '''
+    strcmd = "vagrant ssh -c 'oc login " +ip_port +" --username=" +uname +" --password=" +password +" --insecure-skip-tls-verify" +"'"
+    self.log.info ("Executing : " +strcmd)
+    output = process.system_output(strcmd)
+    return output
 
 def add_new_project(self, project_name):
-        '''
-        TBD
-        '''
-        strcmd = "vagrant ssh -c 'oc new-project " +project_name +"'"
-        self.log.info ("Executing : " +strcmd)
-        time.sleep(2)
-        output = process.system_output(strcmd)
-        return output
+    '''
+    TBD
+    '''
+    strcmd = "vagrant ssh -c 'oc new-project " +project_name +"'"
+    self.log.info ("Executing : " +strcmd)
+    time.sleep(2)
+    output = process.system_output(strcmd)
+    return output
 
 def add_new_app(self, registry):
-        '''
-        TBD
-        '''
-        strcmd = "vagrant ssh -c 'oc new-app " +registry +"'"
-        lst = registry.split("/")
-        repo = lst[len(lst) - 1]
-        self.log.info ("Executing : " +strcmd)
-        time.sleep(2)
+    '''
+    TBD
+    '''
+    strcmd = "vagrant ssh -c 'oc new-app " +registry +"'"
+    lst = registry.split("/")
+    repo = lst[len(lst) - 1]
+    self.log.info ("Executing : " +strcmd)
+    time.sleep(2)
                 
-        lst = []
-        output = process.system_output(strcmd)
-        for lines in output.splitlines():
-            if repo in lines:
-                lst.append(lines)
+    lst = []
+    output = process.system_output(strcmd)
+    for lines in output.splitlines():
+        if repo in lines:
+            lst.append(lines)
                 
-        lst = lst[len(lst) - 1].split("'") 
-        strcmd1 = "vagrant ssh -c " +"'" +lst[1] +"'"
-        self.log.info ("Executing : " +strcmd1) 
-        time.sleep(30)
+    lst = lst[len(lst) - 1].split("'") 
+    strcmd1 = "vagrant ssh -c " +"'" +lst[1] +"'"
+    self.log.info ("Executing : " +strcmd1) 
+    time.sleep(30)
                        
         
-        output = process.system_output(strcmd1)
-        strcmd2 = "vagrant ssh -c 'oc status -v'"
-        self.log.info ("Executing : " +strcmd2)
-        time.sleep(2)
+    output = process.system_output(strcmd1)
+    strcmd2 = "vagrant ssh -c 'oc status -v'"
+    self.log.info ("Executing : " +strcmd2)
+    time.sleep(2)
 
-        output = process.system_output(strcmd2)
-        return output
+    output = process.system_output(strcmd2)
+    return output
 
 def oc_port_expose(self, service_name):
     '''

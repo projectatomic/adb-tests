@@ -2,6 +2,7 @@ path_linux : '/home/amit/openshift/rc5/cdk/components/rhel/misc/shared_folder/rh
 path_win : ''
 path_mac : ''
 openshift_lib_MODULE : '/home/amit/workspace/cdk-testsuite/libraries/openshift/openshift.py'
+openshift_util_MODULE : '/home/amit/workspace/cdk-testsuite/utils/openshiftUtils.py'
 openshift_login_USERNAME : 'openshift-dev'
 openshift_login_PASSWORD : 'devel'
 openshift_console_URL : '10.1.2.2:8443'

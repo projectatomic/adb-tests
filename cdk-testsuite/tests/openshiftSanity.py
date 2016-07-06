@@ -3,12 +3,13 @@ Created on Jun 29, 2016
 
 @author: amit
 '''
-import time
 from avocado import Test
+from avocado import VERSION
+import imp
 import logging
 import os
-import imp
 import re
+import time
 
 log = logging.getLogger("Openshift.Debug")
 
@@ -29,6 +30,10 @@ class OpenshiftTests(Test):
             self.log.info(self.params.get('path_mac'))
         global openshift
         openshift = imp.load_source('openshift', self.params.get('openshift_lib_MODULE'))
+        self.log.info("###########################################################################################")
+        self.log.info(openshift.openshiftLibInfo(self))
+        self.log.info("Avocado version : %s" % VERSION)
+        self.log.info("###########################################################################################")
         
     def test_oc_new_python_project(self):
         '''

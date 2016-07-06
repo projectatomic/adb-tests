@@ -3,12 +3,20 @@ Created on Jun 29, 2016
 
 @author: amit
 '''
-import time
 from avocado.utils import process
+import imp
 import logging
+import time
 
 log = logging.getLogger("Openshift.Debug")
-    
+
+def openshiftLibInfo(self):
+    '''
+    TBD
+    '''
+    openshiftUtils = imp.load_source('openshiftUtils', self.params.get('openshift_util_MODULE'))
+    self.log.info("Openshift library version : " +openshiftUtils.get_version())
+
 def oc_usr_login(self, ip_port, uname, password):
     '''
     TBD

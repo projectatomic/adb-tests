@@ -42,6 +42,9 @@ start_k8s() {
       echo ...
       sleep 1
   done
+
+  # Delay due to CI now being fast enough
+  sleep 5
 }
 
 

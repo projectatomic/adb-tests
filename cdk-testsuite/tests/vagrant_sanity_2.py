@@ -23,12 +23,12 @@ class VagrantSanity(Test):
 
 
     def test_vagrant_up(self):
-	self.log.info("Destroying any old vagrant box...")
+	self.log.info("Destroying old vagrant box, if any...")
 	self.test_vagrant_destroy()
-	cmd = "vagrant up --provider %s" %(self.vagrant_PROVIDER)
+	#cmd = "vagrant up --provider %s" %(self.vagrant_PROVIDER)
 	self.log.info("Brining up the vagrant box...")
 	child = pexpect.spawn ('vagrant up')
-	child.expect('.*Would you like to register the system now.*',timeout=250)
+	child.expect('.*Would you like to register the system now.*', timeout=300)
 	child.sendline ('n')
 	#self.log.info(child.before)
 	time.sleep(60)
@@ -39,7 +39,7 @@ class VagrantSanity(Test):
         cmd = "vagrant up --provider %s" %(self.vagrant_PROVIDER)
         self.log.info("Brining up the vagrant box and registering to RHN...")
         child = pexpect.spawn ('vagrant up')
-        child.expect('.*Would you like to register the system now.*', timeout=250)
+        child.expect('.*Would you like to register the system now.*', timeout=300)
         child.sendline ('y')
         child.expect('.*username.*')
         child.sendline('self.vagrant_RHN_USERNAME')
@@ -53,6 +53,7 @@ class VagrantSanity(Test):
         self.log.info("Checking the ssh access into the vagrant box...")
         out = process.run(cmd, shell=True)
         self.assertEqual("Linux\r\n", out.stdout)
+        self.log.info("ssh access into the vagrant box is successful...")
 
 
     def test_vagrant_suspend(self):

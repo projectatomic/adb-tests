@@ -30,7 +30,6 @@ class VagrantSanity(Test):
 	child = pexpect.spawn ('vagrant up')
 	child.expect('.*Would you like to register the system now.*', timeout=300)
 	child.sendline ('n')
-	#self.log.info(child.before)
 	time.sleep(60)
 	self.vagrant_status()
 	self.test_vagrant_destroy()
@@ -46,7 +45,8 @@ class VagrantSanity(Test):
         child.expect('.*password.*')
         child.sendline('self.vagrant_RHN_PASSWORD')
         #self.log.info(child.before)
-	self.vagrant_status()
+	out = self.vagrant_status()
+        self.assertEqual("running", out)
   
     def test_ssh_into_box(self):
 	cmd = "vagrant ssh -c 'uname'"

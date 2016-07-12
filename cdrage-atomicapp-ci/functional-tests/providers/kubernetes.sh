@@ -43,8 +43,10 @@ start_k8s() {
       sleep 1
   done
 
-  # Create the "kube-system" namespace
-  kubectl create namespace kube-system
+  # Create a cluster configuration to use
+  kubectl config set-cluster test-doc --server=http://localhost:8080
+  kubectl config set-context test-doc --cluster=test-doc
+  kubectl config use-context test-doc
 
   # Delay due to CI being a bit too slow when first starting k8s
   sleep 5

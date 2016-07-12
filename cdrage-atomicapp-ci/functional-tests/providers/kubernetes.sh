@@ -43,7 +43,10 @@ start_k8s() {
       sleep 1
   done
 
-  # Delay due to CI now being fast enough
+  # Create the "kube-system" namespace
+  kubectl create namespace kube-system
+
+  # Delay due to CI being a bit too slow when first starting k8s
   sleep 5
 }
 

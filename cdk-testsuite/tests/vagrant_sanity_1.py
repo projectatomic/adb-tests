@@ -47,19 +47,7 @@ class VagrantSanity(Test):
         child.sendline('self.vagrant_RHN_PASSWORD')
         #self.log.info(child.before)
 	self.vagrant_status()
-
-
-    def est_vagrant_status(self):
-	self.log.info("Checking the status of the vagrant box...")
-        out = self.v.status()
-	state = re.search(r"state='(.*)',", str(out) ).group(1)
-        #self.log.debug(state)
-        self.log.info("State of the vagrant box is %s" %(state))
-	if state in ["running"]:
-	    self.assertEqual("running", state)
-	    self.log.info("The vagrant Box is running fine")
-	return state
-
+  
     def test_ssh_into_box(self):
 	cmd = "vagrant ssh -c 'uname'"
         self.log.info("Checking the ssh access into the vagrant box...")

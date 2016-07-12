@@ -31,8 +31,9 @@ class VagrantSanity(Test):
 	child.expect('.*Would you like to register the system now.*', timeout=300)
 	child.sendline ('n')
 	time.sleep(60)
-	self.vagrant_status()
-	self.test_vagrant_destroy()
+	out = self.vagrant_status()
+        self.assertEqual("running", out)
+        self.test_vagrant_destroy()
 
     def test_vagrant_up_register(self):
         cmd = "vagrant up --provider %s" %(self.vagrant_PROVIDER)
@@ -60,7 +61,7 @@ class VagrantSanity(Test):
         self.log.info("Suspending the vagrant box...")
         self.v.suspend()
         out = self.vagrant_status()
-	#self.assertTrue(out is "paused" or "saved")
+	self.assertTrue(out is "paused" or "saved")
 
 
     def test_vagrant_resume(self):

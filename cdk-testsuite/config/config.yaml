@@ -1,6 +1,4 @@
-lib_path: "/home/pavan/tests/cdk_tests/new/"
-service_env: ["docker", "openshift"]
-service_status: [ "docker", "openshift", "kubernetes", "" ]
+
 vagrant_BOX_PATH: "/home/pavan/Downloads/20160613/cdk/components/rhel/rhel-ose/"
 vagrant_PROVIDER: ""
 vagrant_RHN_USERNAME: "dsfjd@fdgrgrrtyt.com"

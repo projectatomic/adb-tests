@@ -117,3 +117,41 @@ def oc_logout(self):
     #time.sleep(5)
     output = process.system_output(strcmd)
     return output
+
+def new_project(self, url, username, password, projectname, registry, servicename):
+        '''
+        TBD
+        '''
+        output = oc_usr_login(self, url, username, password)
+        #self.log.info(output)
+        self.assertIn("Login successful", output, "Login failed")
+        
+        output = add_new_project(self, projectname)
+        self.assertIn(projectname, output, "Failed to create " +projectname)
+        
+        output = add_new_app(self, registry)
+        partenLst = []
+        lst = registry.split("/")
+        repo = lst[len(lst) - 1]
+        for lines in output.splitlines():
+            parten = re.search(r"^(?=.*?\b\\*\b)(?=.*?\bfailed\b)(?=.*?\b%s\b).*$" %repo, lines)
+            partenLst.append(parten)
+        match = "NotFound"
+        for i in partenLst:
+            if i != None:
+                match = "Found"
+                break
+        self.assertIn("NotFound", match, registry +" deployment failed")
+        
+        output = oc_port_expose(self, servicename)
+        self.assertIn("exposed", output, "Service failed to expose " +projectname)
+                                
+        time.sleep(5)
+        output = xip_io(self, servicename, projectname)
+        self.assertIn("HTTP/1.1 200 OK", output, "curl -I http://" +servicename +"-" +projectname +".rhel-cdk.10.1.2.2.xip.io/ fail to expose to outside")
+                                    
+        output = oc_get_pod(self)
+        self.assertIn("Running", output, "Failed to run pod")
+                                        
+        output = oc_delete(self, projectname)
+        self.assertIn("deleted", output, "Failed to delete " +projectname)

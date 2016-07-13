@@ -8,8 +8,6 @@ from avocado import VERSION
 import imp
 import logging
 import os
-import re
-import time
 
 log = logging.getLogger("Openshift.Debug")
 

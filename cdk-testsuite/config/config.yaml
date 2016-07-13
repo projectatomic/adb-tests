@@ -3,25 +3,23 @@ path_win : ''
 path_mac : ''
 openshift_lib_MODULE : '/home/amit/workspace/cdk-testsuite/libraries/openshift/openshift.py'
 openshift_util_MODULE : '/home/amit/workspace/cdk-testsuite/utils/openshiftUtils.py'
-openshift_login_USERNAME : 'openshift-dev'
-openshift_login_PASSWORD : 'devel'
-openshift_console_URL : '10.1.2.2:8443'
+openshift_USERNAME : 'openshift-dev'
+openshift_PASSWORD : 'devel'
+openshift_URL : '10.1.2.2:8443'
 
-openshift_new_python_PROJECT : 'test-python27'
+openshift_python_PROJECT : 'test-python27'
 openshift_python_REGISTRY : 'registry.access.redhat.com/rhscl/python-27-rhel7~https://github.com/openshift/django-ex' 
 service_python_NAME : "django-ex"
 
-openshift_new_ruby_PROJECT : 'test-ruby'
+openshift_ruby_PROJECT : 'test-ruby'
 openshift_ruby_REGISTRY : 'openshift/ruby-20-centos7~https://github.com/openshift/ruby-hello-world' 
 service_ruby_NAME : "ruby-hello-world"
 
-openshift_new_perl_PROJECT : 'test-perl'
+openshift_perl_PROJECT : 'test-perl'
 openshift_perl_REGISTRY : 'registry.access.redhat.com/rhscl/perl-520-rhel7~https://github.com/openshift/dancer-ex' 
 service_perl_NAME : "dancer-ex"
 
 
-openshift_new_nodejs_PROJECT : 'test-nodejs'
+openshift_nodejs_PROJECT : 'test-nodejs'
 openshift_nodejs_REGISTRY : 'registry.access.redhat.com/rhscl/nodejs-4-rhel7~https://github.com/openshift/nodejs-ex' 
 service_nodejs_NAME : "nodejs-ex"
-
-

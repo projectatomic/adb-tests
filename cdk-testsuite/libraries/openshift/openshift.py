@@ -16,7 +16,7 @@ def openshiftLibInfo(self):
     '''
     openshiftUtils = imp.load_source('openshiftUtils', self.params.get('openshift_util_MODULE'))
     self.log.info("Openshift library version : " +openshiftUtils.get_version())
-
+    
 def oc_usr_login(self, ip_port, uname, password):
     '''
     TBD

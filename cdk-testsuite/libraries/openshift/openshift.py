@@ -6,6 +6,7 @@ Created on Jun 29, 2016
 from avocado.utils import process
 import imp
 import logging
+import re
 import time
 
 log = logging.getLogger("Openshift.Debug")

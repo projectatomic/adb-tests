@@ -19,7 +19,6 @@ openshift_perl_PROJECT : 'test-perl'
 openshift_perl_REGISTRY : 'registry.access.redhat.com/rhscl/perl-520-rhel7~https://github.com/openshift/dancer-ex' 
 service_perl_NAME : "dancer-ex"
 
-
 openshift_nodejs_PROJECT : 'test-nodejs'
 openshift_nodejs_REGISTRY : 'registry.access.redhat.com/rhscl/nodejs-4-rhel7~https://github.com/openshift/nodejs-ex' 
 service_nodejs_NAME : "nodejs-ex"

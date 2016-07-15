@@ -1,6 +1,7 @@
 import time
 from avocado import Test
 import subprocess
+import imp
 import os
 Utils = imp.load_source('Utils', '../utils/Utils.py')
 
@@ -39,11 +40,7 @@ def vagrant_installation(self,machine=None,sudopassword=None):
     elif "Darwin" in machine:
         self.log.info("Vagrant binary downloading on " + machine)
         self.log.info("Under construction!!")
-        '''
-        os.system("wget https://releases.hashicorp.com/vagrant/1.8.4/vagrant_1.8.4.msi")
-        os.system('msiexec.exe /a vagrant_1.8.4.msi  /q')
-        time.sleep(30)
-        '''
+        
 
 def enable_virtualization(self,machine=None,sudopassword=None,sub_username=None,sub_password=None):
     self.log.info("Enableing virtualization on machine "+machine)
@@ -132,7 +129,7 @@ def enable_virtualization(self,machine=None,sudopassword=None,sub_username=None,
     elif "CYGWIN" in machine:
         self.log.info(" This is an Windows machine with complete name ::  " + machine)
         ## Utils.sh_cmd() Continue.. with hyper - V if enabled
-        
+
     elif "Darwin" in machine:
         self.log.info("Vagrant binary downloading on " + machine)
         self.log.info("Under construction!!")
@@ -143,28 +140,17 @@ def enable_virtualization(self,machine=None,sudopassword=None,sub_username=None,
 def virtualbox_installation(self,machine=None,sudopassword=None):
     self.log.info("Downloading Vagrant on Machine ::" +machine)
     if machine == "Linux":
-        self.log.info("virtualbox binary downloading on "+machine)
-        self.log.info("echo "+str(sudopassword)+" | sudo -S yum install vagrant -y")
-        os.system("echo "+str(sudopassword)+" | sudo -S yum install vagrant -y")
+        # Not implimented yet
+        self.log.info("virtualbox this part is already done in Installing virtualization ::s "+machine)
+        
     elif "CYGWIN" in machine:
-        self.log.info("virtualbox binary downloading on " + machine)
-        if not os.path.isfile('./vagrant_1.8.4.msi'):
-            self.log.info('wget https://releases.hashicorp.com/vagrant/1.8.4/vagrant_1.8.4.msi')
-            p = subprocess.Popen('wget https://releases.hashicorp.com/vagrant/1.8.4/vagrant_1.8.4.msi', stdout=subprocess.PIPE, shell=True)
-            (output, err) = p.communicate()
-            self.log.debug(output)
-        else:
-            os.system('msiexec.exe /a vagrant_1.8.4.msi')
-            time.sleep(30)
-            self.log.info('')
+        # Not implimented yet
+        self.log.info("virtualbox binary should be already present on your :: " + machine)
+
     elif "Darwin" in machine:
-        self.log.info("virtualbox binary downloading on " + machine)
-        self.log.info("Under construction!!")
-        '''
-        os.system("wget https://releases.hashicorp.com/vagrant/1.8.4/vagrant_1.8.4.msi")
-        os.system('msiexec.exe /a vagrant_1.8.4.msi  /q')
-        time.sleep(30)
-        '''
+        # Not implimented yet
+        self.log.info("virtualbox binary should be already present on your :: " + machine)
+
 
 
 

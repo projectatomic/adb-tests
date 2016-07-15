@@ -11,6 +11,7 @@ import time
 
 log = logging.getLogger("Openshift.Debug")
 
+
 def openshiftLibInfo(self):
     '''
     TBD
@@ -119,7 +120,33 @@ def oc_logout(self):
     output = process.system_output(strcmd)
     return output
 
-def new_project(self, url, username, password, projectname, registry, servicename):
+def add_new_template(self, template):
+    '''
+    TBD
+    '''
+    strcmd = "vagrant ssh -c 'oc new-app --template=" +template +"'"
+    self.log.info ("Executing : " +strcmd)
+        
+    lst = []
+    output = process.system_output(strcmd)
+    for lines in output.splitlines():
+        if template in lines:
+            lst.append(lines)
+                
+    lst = lst[len(lst) - 1].split("'") 
+    strcmd1 = "vagrant ssh -c " +"'" +lst[1] +"'"
+    self.log.info ("Executing : " +strcmd1) 
+    time.sleep(30)
+    output = process.system_output(strcmd1)
+    
+    strcmd2 = "vagrant ssh -c 'oc status -v'"
+    self.log.info ("Executing : " +strcmd2)
+    time.sleep(2)
+    output = process.system_output(strcmd2)
+    
+    return output
+
+def new_project(self, url, username, password, projectname, registry, servicename, tempalte = False, dbservicename = "default"):
     '''
     TBD
     '''
@@ -128,25 +155,52 @@ def new_project(self, url, username, password, projectname, registry, servicenam
         
     output = add_new_project(self, projectname)
     self.assertIn(projectname, output, "Failed to create " +projectname)
-        
-    output = add_new_app(self, registry)
-    partenLst = []
-    lst = registry.split("/")
-    repo = lst[len(lst) - 1]
-    for lines in output.splitlines():
-        parten = re.search(r"^(?=.*?\b\\*\b)(?=.*?\bfailed\b)(?=.*?\b%s\b).*$" %repo, lines)
-        partenLst.append(parten)
-    match = "NotFound"
-    for i in partenLst:
-        if i != None:
-            match = "Found"
-            break
-    self.assertIn("NotFound", match, registry +" deployment failed")
-        
-    output = oc_port_expose(self, servicename)
-    self.assertIn("exposed", output, "Service failed to expose " +projectname)
+    
+    if not tempalte:
+        output = add_new_app(self, registry)
+        partenLst = []
+        lst = registry.split("/")
+        repo = lst[len(lst) - 1]
+        for lines in output.splitlines():
+            parten = re.search(r"^(?=.*?\b\\*\b)(?=.*?\bfailed\b)(?=.*?\b%s\b).*$" %repo, lines)
+            partenLst.append(parten)
+        match = "NotFound"
+        for i in partenLst:
+            if i != None:
+                match = "Found"
+                break
+        self.assertIn("NotFound", match, registry +" deployment failed")
+    else:
+        output = add_new_template(self, registry)
+        partenLst = []
+        for lines in output.splitlines():
+            parten = re.search(r"^(?=.*?\b\\*\b)(?=.*?\bfailed\b)(?=.*?\b%s\b).*$" %registry, lines)
+            partenLst.append(parten)
+        match = "NotFound"
+        for i in partenLst:
+            if i != None:
+                match = "Found"
+                break
+        self.assertIn("NotFound", match, registry +" deployment failed")
+        if "default" not in dbservicename:
+            del partenLst[:]
+            for lines in output.splitlines():
+                parten = re.search(r"^(?=.*?\bdeploys\b)(?=.*?\b%s\b)(?=.*?\bopenshift/mongodb\b).*$" %dbservicename, lines)
+                partenLst.append(parten)
+            match = "NotFound"
+            for i in partenLst:
+                if i != None:
+                    match = "Found"
+                    break
+            self.assertIn("Found", match, dbservicename +" deployment failed")
+            
+    if not tempalte:    
+        output = oc_port_expose(self, servicename)
+        self.assertIn("exposed", output, "Service failed to expose " +projectname)
+    else:
+        pass
                                 
-    time.sleep(5)
+    time.sleep(60)
     output = xip_io(self, servicename, projectname)
     self.assertIn("HTTP/1.1 200 OK", output, "curl -I http://" +servicename +"-" +projectname +".rhel-cdk.10.1.2.2.xip.io/ fail to expose to outside")
                                     
@@ -155,3 +209,4 @@ def new_project(self, url, username, password, projectname, registry, servicenam
                                         
     output = oc_delete(self, projectname)
     self.assertIn("deleted", output, "Failed to delete " +projectname)
+

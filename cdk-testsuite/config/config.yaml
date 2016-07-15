@@ -1,8 +1,10 @@
 path_linux : '/home/amit/openshift/rc5/cdk/components/rhel/misc/shared_folder/rhel-ose'
 path_win : ''
 path_mac : ''
+
 openshift_lib_MODULE : '/home/amit/workspace/cdk-testsuite/libraries/openshift/openshift.py'
 openshift_util_MODULE : '/home/amit/workspace/cdk-testsuite/utils/openshiftUtils.py'
+
 openshift_USERNAME : 'openshift-dev'
 openshift_PASSWORD : 'devel'
 openshift_URL : '10.1.2.2:8443'
@@ -22,3 +24,12 @@ service_perl_NAME : "dancer-ex"
 openshift_nodejs_PROJECT : 'test-nodejs'
 openshift_nodejs_REGISTRY : 'registry.access.redhat.com/rhscl/nodejs-4-rhel7~https://github.com/openshift/nodejs-ex' 
 service_nodejs_NAME : "nodejs-ex"
+
+openshift_php_PROJECT : 'test-php'
+openshift_php_template : 'cakephp-example' 
+service_php_NAME : "cakephp-example"
+
+openshift_nodejsmongodb_PROJECT : 'test-nodejs-mongodb'
+openshift_nodejsmongodb_TEMPLATE : 'nodejs-mongodb-example' 
+service_nodejsmongodb_NAME : "nodejs-mongodb-example"
+

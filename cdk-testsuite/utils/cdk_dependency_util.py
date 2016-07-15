@@ -23,9 +23,13 @@ def platform_verification(self):
 def vagrant_installation(self,machine=None,sudopassword=None):
     self.log.info("Downloading Vagrant on Machine ::" +machine)
     if machine == "Linux":
-        self.log.info("Vagrant binary downloading on "+machine)
-        self.log.info("echo "+str(sudopassword)+" | sudo -S yum install vagrant -y")
-        os.system("echo "+str(sudopassword)+" | sudo -S yum install vagrant -y")
+        p = subprocess.Popen("lsb_release -a", stdout=subprocess.PIPE, shell=True)
+        (output, err) = p.communicate()
+        self.log.debug(output)
+        if "Fedora" in output:
+            self.log.info("Vagrant binary downloading on "+machine)
+            self.log.info("echo "+str(sudopassword)+" | sudo -S yum install vagrant -y")
+            os.system("echo "+str(sudopassword)+" | sudo -S yum install vagrant -y")
     elif "CYGWIN" in machine:
         self.log.info("Vagrant binary downloading on " + machine)
         if not os.path.isfile('./vagrant_1.8.4.msi'):
@@ -65,8 +69,8 @@ def enable_virtualization(self,machine=None,sudopassword=None,sub_username=None,
             self.log.info("echo "+str(sudopassword)+" | sudo -S dnf install vagrant vagrant-libvirt vagrant-libvirt-doc vagrant-registration rubygem-ruby-libvirt")
             os.system("echo "+str(sudopassword)+" | sudo -S dnf install vagrant vagrant-libvirt vagrant-libvirt-doc vagrant-registration rubygem-ruby-libvirt")
             ### vagrant group to control VMs through libvirt
-            self.log.info("cp /usr/share/vagrant/gems/doc/vagrant-libvirt-0.0.*/polkit/10-vagrant-libvirt.rules /etc/polkit-1/rules.d")
-            os.system("cp /usr/share/vagrant/gems/doc/vagrant-libvirt-0.0.*/polkit/10-vagrant-libvirt.rules /etc/polkit-1/rules.d")
+            self.log.info("echo "+str(sudopassword)+" | sudo -S cp /usr/share/vagrant/gems/doc/vagrant-libvirt-0.0.*/polkit/10-vagrant-libvirt.rules /etc/polkit-1/rules.d")
+            os.system("echo "+str(sudopassword)+" | sudo -S cp /usr/share/vagrant/gems/doc/vagrant-libvirt-0.0.*/polkit/10-vagrant-libvirt.rules /etc/polkit-1/rules.d")
             ### Restart the libvirt and PolicyKit services for the changes to take effect:
             self.log.info("echo "+str(sudopassword)+" | sudo -S  systemctl restart libvirtd")
             os.system("echo "+str(sudopassword)+" | sudo -S  systemctl restart libvirtd")

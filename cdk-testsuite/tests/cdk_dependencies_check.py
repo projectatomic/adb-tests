@@ -32,9 +32,19 @@ class cdk_dependencies_check(Test):
         vagrant_verification = vagrant.Vagrant()
 
         try:
-            vagrant_installation.enable_virtualization(self,machine=machine,sudopassword=self.params.get('SudoPassword'),sub_username=self.params.get('vagrant_RHN_USERNAME'),sub_password=self.params.get('vagrant_RHN_PASSWORD'))
+            cdk_utils.enable_virtualization(self,machine=machine,sudopassword=self.params.get('SudoPassword'),sub_username=self.params.get('vagrant_RHN_USERNAME'),sub_password=self.params.get('vagrant_RHN_PASSWORD'))
         except:
             print "anything"
+
+    def test_virtualbox(self):
+        self.log.info("Verification check for virtual box installation")
+        self.log.info("Checking which operating system are you using::")
+        machine = cdk_utils.platform_verification(self)
+        cdk_utils.virtualbox_installation(self,machine=machine,sudopassword=self.params.get('SudoPassword'))
+
+if __name__ == '__main__':
+    print "working"
+    #test_vagrant_verification(self)
 
 
 

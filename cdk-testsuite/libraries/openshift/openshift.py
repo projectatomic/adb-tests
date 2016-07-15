@@ -185,7 +185,7 @@ def new_project(self, url, username, password, projectname, registry, servicenam
         if "default" not in dbservicename:
             del partenLst[:]
             for lines in output.splitlines():
-                parten = re.search(r"^(?=.*?\bdeploys\b)(?=.*?\b%s\b)(?=.*?\bopenshift/mongodb\b).*$" %dbservicename, lines)
+                parten = re.search(r"^(?=.*?\bdeploys\b)(?=.*?\b%s\b)(?=.*?\bopenshift/%s\b).*$" %(dbservicename, dbservicename), lines)
                 partenLst.append(parten)
             match = "NotFound"
             for i in partenLst:

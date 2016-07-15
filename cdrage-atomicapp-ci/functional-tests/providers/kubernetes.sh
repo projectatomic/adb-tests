@@ -14,7 +14,7 @@ start_k8s() {
   fi
 
   # Use alpha for now since this contains the new hyperkube format going forward
-  K8S_VERSION=1.2.2
+  K8S_VERSION=1.3.0
   docker run \
   --volume=/:/rootfs:ro \
   --volume=/sys:/sys:ro \
@@ -42,6 +42,18 @@ start_k8s() {
       echo ...
       sleep 1
   done
+
+  # Set the appropriate .kube/config configuration
+  kubectl config set-cluster dev --server=http://localhost:8080
+  kubectl config set-context dev --cluster=dev --user=default
+  kubectl config use-context dev
+  kubectl config set-credentials default --token=foobar
+
+  # Debug info:
+  cat ~/.kube/config
+
+  # Delay due to CI being a bit too slow when first starting k8s
+  sleep 5
 }
 
 

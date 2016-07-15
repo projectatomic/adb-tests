@@ -32,12 +32,11 @@ class OpenshiftTests(Test):
         self.log.info(openshift.openshiftLibInfo(self))
         self.log.info("Avocado version : %s" % VERSION)
         self.log.info("###########################################################################################")
-        
+           
     def test_python_project(self):
         '''
         TBD
         '''
-        #openshift.new_project(self, self.params.get('openshift_console_URL'), self.params.get('openshift_login_USERNAME'), self.params.get('openshift_login_PASSWORD'), self.params.get('openshift_new_python_PROJECT'), self.params.get('openshift_python_REGISTRY'), self.params.get('service_python_NAME'))
         openshift.new_project(self, self.params.get('openshift_URL'), self.params.get('openshift_USERNAME'), 
                               self.params.get('openshift_PASSWORD'), self.params.get('openshift_python_PROJECT'), 
                               self.params.get('openshift_python_REGISTRY'), self.params.get('service_python_NAME'))
@@ -66,7 +65,25 @@ class OpenshiftTests(Test):
                               self.params.get('openshift_PASSWORD'), self.params.get('openshift_nodejs_PROJECT'), 
                               self.params.get('openshift_nodejs_REGISTRY'), self.params.get('service_nodejs_NAME'))
     
-    def test_oc_logout(self):
+    def test_php_project(self):
+        '''
+        TBD
+        '''
+        openshift.new_project(self, self.params.get('openshift_URL'), self.params.get('openshift_USERNAME'), 
+                              self.params.get('openshift_PASSWORD'), self.params.get('openshift_php_PROJECT'), 
+                              self.params.get('openshift_php_template'), self.params.get('service_php_NAME'), 
+                              tempalte = True)
+    
+    def test_nodejs_mongodb_template(self):
+        '''
+        TBD
+        '''
+        openshift.new_project(self, self.params.get('openshift_URL'), self.params.get('openshift_USERNAME'), 
+                              self.params.get('openshift_PASSWORD'), self.params.get('openshift_nodejsmongodb_PROJECT'), 
+                              self.params.get('openshift_nodejsmongodb_TEMPLATE'), self.params.get('service_nodejsmongodb_NAME'), 
+                              tempalte = True, dbservicename = "mongodb")
+    
+    def test_logout(self):
         '''
         TBD
         '''

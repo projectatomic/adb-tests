@@ -1,5 +1,5 @@
 
-vagrant_BOX_PATH: "/home/pavan/Downloads/20160613/cdk/components/rhel/rhel-ose/"
+vagrant_BOX_PATH: ""
 vagrant_PROVIDER: ""
-vagrant_RHN_USERNAME: "dsfjd@fdgrgrrtyt.com"
-vagrant_RHN_PASSWORD: "************"
+vagrant_RHN_USERNAME: ""
+vagrant_RHN_PASSWORD: ""

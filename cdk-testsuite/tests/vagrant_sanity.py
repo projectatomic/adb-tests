@@ -15,6 +15,7 @@ class VagrantSanity(Test):
 
 
     def vagrant_status(self):
+    	''' checks status of vagrant box and returns the state '''
         self.log.info("Checking the status of the vagrant box...")
         out = self.v.status()
         state = re.search(r"state='(.*)',", str(out) ).group(1)
@@ -23,6 +24,7 @@ class VagrantSanity(Test):
 
 
     def test_vagrant_up(self):
+    	''' destroy old box and bring up a the vagrant box and finally destroy '''
 	self.log.info("Destroying old vagrant box, if any...")
 	self.test_vagrant_destroy()
 	#cmd = "vagrant up --provider %s" %(self.vagrant_PROVIDER)
@@ -36,6 +38,7 @@ class VagrantSanity(Test):
 	self.test_vagrant_destroy()
 
     def test_vagrant_up_register(self):
+    	''' vagrant up with registration to RHN '''
         #cmd = "vagrant up --provider %s" %(self.vagrant_PROVIDER)
         self.log.info("Brining up the vagrant box and registering to RHN...")
         child = pexpect.spawn ('vagrant up')
@@ -50,6 +53,7 @@ class VagrantSanity(Test):
 	self.assertEqual("running", out)
 
     def test_ssh_into_box(self):
+    	''' test ssh into the vagrant box '''
 	cmd = "vagrant ssh -c 'uname'"
         self.log.info("Checking the ssh access into the vagrant box...")
         out = process.run(cmd, shell=True)
@@ -57,6 +61,7 @@ class VagrantSanity(Test):
 	self.log.info("ssh access into the vagrant box is successful...")
 
     def test_vagrant_suspend(self):
+    	''' test to suspend the vagrant box '''
         self.log.info("Suspending the vagrant box...")
         self.v.suspend()
         out = self.vagrant_status()
@@ -64,6 +69,7 @@ class VagrantSanity(Test):
 
 
     def test_vagrant_resume(self):
+    	''' resume the suspended box '''
         self.log.info("Resuming the vagrant box...")
         self.v.resume()
         out = self.vagrant_status()
@@ -71,6 +77,7 @@ class VagrantSanity(Test):
 
 
     def test_vagrant_halt(self):
+    	''' halt a running vagrant box '''
         self.log.info("Halting the vagrant box...")
         self.v.halt()
         out = self.vagrant_status()
@@ -78,6 +85,7 @@ class VagrantSanity(Test):
 
 
     def test_vagrant_reload(self):
+    	''' reload the halted box '''
         self.log.info("Reloading the vagrant box...")
         self.v.reload()
 	out = self.vagrant_status()
@@ -85,6 +93,7 @@ class VagrantSanity(Test):
 
 
     def test_vagrant_destroy(self):
+    	''' destroy the vagrant box '''
         self.log.info("Destroying the vagrant box...")
         self.v.destroy()
         out = self.vagrant_status()

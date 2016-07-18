@@ -1,1 +1,2 @@
 netsh firewall set icmpsetting 8 enable
+http://www.hurryupandwait.io/blog/understanding-and-troubleshooting-winrm-connection-and-authentication-a-thrill-seekers-guide-to-adventure

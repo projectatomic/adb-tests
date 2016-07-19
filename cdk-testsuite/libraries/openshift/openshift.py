@@ -14,14 +14,21 @@ log = logging.getLogger("Openshift.Debug")
 
 def openshiftLibInfo(self):
     '''
-    TBD
+    Get openshift user defined library version
+    Args:
+        self (object): Object of the current method
     '''
     openshiftUtils = imp.load_source('openshiftUtils', self.params.get('openshift_util_MODULE'))
     self.log.info("Openshift library version : " +openshiftUtils.get_version())
     
 def oc_usr_login(self, ip_port, uname, password):
     '''
-    TBD
+    Login to openshift server and returns output of the oc command executed
+    Args:
+        self (object): Object of the current method
+        ip_port (str): ip and port of openshift to be used
+        uname (str): username of openshift web console to be used
+        password (str): password of openshift web console to be used
     '''
     strcmd = "vagrant ssh -c 'oc login " +ip_port +" --username=" +uname +" --password=" +password +" --insecure-skip-tls-verify" +"'"
     self.log.info ("Executing : " +strcmd)
@@ -30,7 +37,10 @@ def oc_usr_login(self, ip_port, uname, password):
 
 def add_new_project(self, project_name):
     '''
-    TBD
+    Adding new project to openshift server and returns output of the oc command executed
+    Args:
+        self (object): Object of the current method
+        project_name (str): name of the project to be added to the openshift server
     '''
     strcmd = "vagrant ssh -c 'oc new-project " +project_name +"'"
     self.log.info ("Executing : " +strcmd)
@@ -40,7 +50,10 @@ def add_new_project(self, project_name):
 
 def add_new_app(self, registry):
     '''
-    TBD
+    Adding new application to new project created for openshift server and returns output of the oc command executed
+    Args:
+        self (object): Object of the current method
+        registry (str): registry path/location
     '''
     strcmd = "vagrant ssh -c 'oc new-app " +registry +"'"
     lst = registry.split("/")
@@ -70,7 +83,10 @@ def add_new_app(self, registry):
 
 def oc_port_expose(self, service_name):
     '''
-    TBD
+    Service port to expose outside and returns output of the oc command executed
+    Args:
+        self (object): Object of the current method
+        service_name (str): name of the service to be exposed outside
     '''
     strcmd = "vagrant ssh -c 'oc expose service " +service_name +"'"
     time.sleep(10)
@@ -79,7 +95,9 @@ def oc_port_expose(self, service_name):
 
 def oc_get_service(self):
     '''
-    TBD
+    Get the service name of the application and returns output of the oc command executed
+    Args:
+        self (object): Object of the current method
     '''
     strcmd = "vagrant ssh -c 'oc get service'"
     output = process.system_output(strcmd)
@@ -87,7 +105,9 @@ def oc_get_service(self):
 
 def oc_get_pod(self):
     '''
-    TBD
+    Get the pods details of the containerized application and returns output of the oc command executed
+    Args:
+        self (object): Object of the current method
     '''
     strcmd = "vagrant ssh -c 'oc get pod'"
     output = process.system_output(strcmd)
@@ -95,7 +115,11 @@ def oc_get_pod(self):
 
 def xip_io(self, service_name, openshift_project_name):
     '''
-    TBD
+    check xip.io runs a custom DNS server on the public Internet and returns output of the oc command executed
+    Args:
+        self (object): Object of the current method
+        service_name (string): name of the service to be exposed outside
+        openshift_project_name (string): name of the project to be added to the openshift server
     '''
     strcmd = "curl -I http://" +service_name +"-" +openshift_project_name +".rhel-cdk.10.1.2.2.xip.io/"
     output = process.system_output(strcmd)
@@ -103,7 +127,10 @@ def xip_io(self, service_name, openshift_project_name):
 
 def oc_delete(self, project_name):
     '''
-    TBD
+    Delete the openshift project and returns output of the oc command executed
+    Args:
+        self (object): Object of the current method
+        openshift_project_name (string): name of the project to be added to the openshift server
     '''
     strcmd = "vagrant ssh -c 'oc delete project " +project_name +"'"
     time.sleep(15)
@@ -112,17 +139,21 @@ def oc_delete(self, project_name):
 
 def oc_logout(self):
     '''
-    TBD
+    logout from openshift server and returns output of the oc command executed
+    Args:
+        self (object): Object of the current method
     '''
     strcmd = "vagrant ssh -c 'oc logout'"
     self.log.info ("Executing : " +strcmd)
-    #time.sleep(5)
     output = process.system_output(strcmd)
     return output
 
 def add_new_template(self, template):
     '''
-    TBD
+    Adding new template to openshift server and returns output of the oc command executed
+    Args:
+        self (object): Object of the current method
+        template (string): name of the openshift template
     '''
     strcmd = "vagrant ssh -c 'oc new-app --template=" +template +"'"
     self.log.info ("Executing : " +strcmd)
@@ -148,7 +179,16 @@ def add_new_template(self, template):
 
 def new_project(self, url, username, password, projectname, registry, servicename, tempalte = False, dbservicename = "default"):
     '''
-    TBD
+    Adding a new application to the project and returns output of the oc command executed
+    Args:
+        self (object): Object of the current method
+        username (string): username of openshift web console to be used
+        password (string): password of openshift web console to be used
+        projectname (string): name of the project to be added to the openshift server
+        registry (string): registry path/location
+        servicename (string): name of the service to be exposed outside
+        tempalte (boolean): if creating the s2i using openshift template then it takes value as True otherwise the default value False 
+        dbservicename (string): Takes the database service name if specified otherwise default
     '''
     output = oc_usr_login(self, url, username, password)
     self.assertIn("Login successful", output, "Login failed")
@@ -209,4 +249,3 @@ def new_project(self, url, username, password, projectname, registry, servicenam
                                         
     output = oc_delete(self, projectname)
     self.assertIn("deleted", output, "Failed to delete " +projectname)
-

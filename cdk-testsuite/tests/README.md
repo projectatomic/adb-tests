@@ -18,4 +18,4 @@ How do I Install and Run the openshift sanity test cases ?
 1. clone the repository https://github.com/projectatomic/adb-tests/tree/master/cdk-testsuite
 2. open the terminal and run the command "avocado run /path_to_test_dir/openshiftSanity.py --multiplex /path_to_config_dir/config.yaml"  
 
-NOTE : Only the input parameters are present in the config file
+NOTE : Only the input parameters are present in the config file. So the library and util modules need to be updated before running the command.

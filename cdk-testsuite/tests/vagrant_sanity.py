@@ -6,12 +6,12 @@ import os, re, time, pexpect, vagrant
 
 class VagrantSanity(Test):
     def setUp(self):
-	self.vagrant_BOX_PATH = self.params.get('vagrant_BOX_PATH')
+	self.vagrant_VAGRANTFILE_DIR = self.params.get('vagrant_VAGRANTFILE_DIR')
         self.vagrant_PROVIDER = self.params.get('vagrant_PROVIDER', default='')
 	self.vagrant_RHN_USERNAME = self.params.get('vagrant_RHN_USERNAME')
 	self.vagrant_RHN_PASSWORD = self.params.get('vagrant_RHN_PASSWORD')
-	os.chdir(self.vagrant_BOX_PATH)
-	self.v = vagrant.Vagrant(self.vagrant_BOX_PATH)
+	os.chdir(self.vagrant_VAGRANTFILE_DIR)
+	self.v = vagrant.Vagrant(self.vagrant_VAGRANTFILE_DIR)
 
 
     def vagrant_status(self):
@@ -41,16 +41,12 @@ class VagrantSanity(Test):
     	''' vagrant up with registration to RHN '''
         #cmd = "vagrant up --provider %s" %(self.vagrant_PROVIDER)
         self.log.info("Brining up the vagrant box and registering to RHN...")
-        child = pexpect.spawn ('vagrant up')
-        child.expect('.*Would you like to register the system now.*', timeout=300)
-        child.sendline ('y')
-        child.expect('.*username.*')
-        child.sendline('self.vagrant_RHN_USERNAME')
-        child.expect('.*password.*')
-        child.sendline('self.vagrant_RHN_PASSWORD')
-        #self.log.info(child.before)
+        os.environ["SUB_USERNAME"] = self.vagrant_RHN_USERNAME
+	os.environ["SUB_PASSWORD"] = self.vagrant_RHN_PASSWORD
+	self.v.up()
 	out = self.vagrant_status()
 	self.assertEqual("running", out)
+
 
     def test_ssh_into_box(self):
     	''' test ssh into the vagrant box '''

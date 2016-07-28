@@ -8,8 +8,82 @@ from avocado import VERSION
 import imp
 import logging
 import os
+import re
 
 log = logging.getLogger("Openshift.Debug")
+
+def new_project(self, url, username, password, projectname, registry, servicename, tempalte = False, dbservicename = "default"):
+    '''
+    Adding a new application to the project and returns output of the oc command executed
+    Args:
+        self (object): Object of the current method
+        username (string): username of openshift web console to be used
+        password (string): password of openshift web console to be used
+        projectname (string): name of the project to be added to the openshift server
+        registry (string): registry path/location
+        servicename (string): name of the service to be exposed outside
+        tempalte (boolean): if creating the s2i using openshift template then it takes value as True otherwise the default value False 
+        dbservicename (string): Takes the database service name if specified otherwise default
+    '''
+    output = openshift.oc_usr_login(self, url, username, password)
+    self.assertIn("Login successful", output, "Login failed")
+        
+    output = openshift.add_new_project(self, projectname)
+    self.assertIn(projectname, output, "Failed to create " +projectname)
+    
+    if not tempalte:
+        output = openshift.add_new_app(self, registry)
+        partenLst = []
+        lst = registry.split("/")
+        repo = lst[len(lst) - 1]
+        for lines in output.splitlines():
+            parten = re.search(r"^(?=.*?\b\\*\b)(?=.*?\bfailed\b)(?=.*?\b%s\b).*$" %repo, lines)
+            partenLst.append(parten)
+        match = "NotFound"
+        for i in partenLst:
+            if i != None:
+                match = "Found"
+                break
+        self.assertIn("NotFound", match, registry +" deployment failed")
+    else:
+        output = openshift.add_new_template(self, registry)
+        partenLst = []
+        for lines in output.splitlines():
+            parten = re.search(r"^(?=.*?\b\\*\b)(?=.*?\bfailed\b)(?=.*?\b%s\b).*$" %registry, lines)
+            partenLst.append(parten)
+        match = "NotFound"
+        for i in partenLst:
+            if i != None:
+                match = "Found"
+                break
+        self.assertIn("NotFound", match, registry +" deployment failed")
+        if "default" not in dbservicename:
+            del partenLst[:]
+            for lines in output.splitlines():
+                parten = re.search(r"^(?=.*?\bdeploys\b)(?=.*?\b%s\b)(?=.*?\bopenshift/%s\b).*$" %(dbservicename, dbservicename), lines)
+                partenLst.append(parten)
+            match = "NotFound"
+            for i in partenLst:
+                if i != None:
+                    match = "Found"
+                    break
+            self.assertIn("Found", match, dbservicename +" deployment failed")
+            
+    if not tempalte:    
+        output = openshift.oc_port_expose(self, servicename)
+        self.assertIn("exposed", output, "Service failed to expose " +projectname)
+    else:
+        pass
+    """                            
+    time.sleep(60)
+    output = openshift.xip_io(self, servicename, projectname)
+    self.assertIn("HTTP/1.1 200 OK", output, "curl -I http://" +servicename +"-" +projectname +".rhel-cdk.10.1.2.2.xip.io/ fail to expose to outside")
+    """                                
+    output = openshift.oc_get_pod(self)
+    self.assertIn("Running", output, "Failed to run pod")
+                                        
+    output = openshift.oc_delete(self, projectname)
+    self.assertIn("deleted", output, "Failed to delete " +projectname)
 
 class OpenshiftTests(Test):
 
@@ -34,7 +108,7 @@ class OpenshiftTests(Test):
         self.log.info(openshift.openshiftLibInfo(self))
         self.log.info("Avocado version : %s" % VERSION)
         self.log.info("###########################################################################################")
-           
+               
     def test_python_project(self):
         '''
         Runs sanity on openshift s2i python source
@@ -55,7 +129,7 @@ class OpenshiftTests(Test):
             openshift_python_REGISTRY (string): python registry path/location
             service_python_NAME (string): name of the python service to be exposed outside
         '''
-        openshift.new_project(self, self.params.get('openshift_URL'), self.params.get('openshift_USERNAME'), 
+        new_project(self, self.params.get('openshift_URL'), self.params.get('openshift_USERNAME'), 
                               self.params.get('openshift_PASSWORD'), self.params.get('openshift_python_PROJECT'), 
                               self.params.get('openshift_python_REGISTRY'), self.params.get('service_python_NAME'))
     
@@ -79,7 +153,7 @@ class OpenshiftTests(Test):
             openshift_ruby_REGISTRY (string): ruby registry path/location
             service_ruby_NAME (string): name of the ruby service to be exposed outside
         '''
-        openshift.new_project(self, self.params.get('openshift_URL'), self.params.get('openshift_USERNAME'), 
+        new_project(self, self.params.get('openshift_URL'), self.params.get('openshift_USERNAME'), 
                               self.params.get('openshift_PASSWORD'), self.params.get('openshift_ruby_PROJECT'), 
                               self.params.get('openshift_ruby_REGISTRY'), self.params.get('service_ruby_NAME'))
     
@@ -103,7 +177,7 @@ class OpenshiftTests(Test):
             openshift_perl_REGISTRY (string): perl registry path/location
             service_perl_NAME (string): name of the perl service to be exposed outside
         '''
-        openshift.new_project(self, self.params.get('openshift_URL'), self.params.get('openshift_USERNAME'), 
+        new_project(self, self.params.get('openshift_URL'), self.params.get('openshift_USERNAME'), 
                               self.params.get('openshift_PASSWORD'), self.params.get('openshift_perl_PROJECT'), 
                               self.params.get('openshift_perl_REGISTRY'), self.params.get('service_perl_NAME'))
     
@@ -127,7 +201,7 @@ class OpenshiftTests(Test):
             openshift_nodejs_REGISTRY (string): nodejs registry path/location
             service_nodejs_NAME (string): name of the nodejs service to be exposed outside
         '''
-        openshift.new_project(self, self.params.get('openshift_URL'), self.params.get('openshift_USERNAME'), 
+        new_project(self, self.params.get('openshift_URL'), self.params.get('openshift_USERNAME'), 
                               self.params.get('openshift_PASSWORD'), self.params.get('openshift_nodejs_PROJECT'), 
                               self.params.get('openshift_nodejs_REGISTRY'), self.params.get('service_nodejs_NAME'))
     
@@ -150,9 +224,9 @@ class OpenshiftTests(Test):
             openshift_php_PROJECT (string): name of the php project to be added to the openshift server
             openshift_php_template (string): name of php template
             service_php_NAME (string): name of the php service to be exposed outside
-            tepmlate (boolean): True if using template
+            tepmlate (boolean): True if using 
         '''
-        openshift.new_project(self, self.params.get('openshift_URL'), self.params.get('openshift_USERNAME'), 
+        new_project(self, self.params.get('openshift_URL'), self.params.get('openshift_USERNAME'), 
                               self.params.get('openshift_PASSWORD'), self.params.get('openshift_php_PROJECT'), 
                               self.params.get('openshift_php_template'), self.params.get('service_php_NAME'), 
                               tempalte = True)
@@ -175,11 +249,11 @@ class OpenshiftTests(Test):
             openshift_PASSWORD (string): password of openshift web console to be used
             openshift_nodejsmongodb_PROJECT (string): name of the nodejs with mongodb project to be added to the openshift server
             openshift_nodejsmongodb_TEMPLATE (string): name of nodejs with mongodb template
-            service_nodejsmongodb_NAME (string): name of the nodejs service to be exposed outside
-            tepmlate (boolean): True if using template
+            service_php_NAME (string): name of the php service to be exposed outside
+            tepmlate (boolean): True if using
             dbservicename (string): Takes name of the database service name 
         '''
-        openshift.new_project(self, self.params.get('openshift_URL'), self.params.get('openshift_USERNAME'), 
+        new_project(self, self.params.get('openshift_URL'), self.params.get('openshift_USERNAME'), 
                               self.params.get('openshift_PASSWORD'), self.params.get('openshift_nodejsmongodb_PROJECT'), 
                               self.params.get('openshift_nodejsmongodb_TEMPLATE'), self.params.get('service_nodejsmongodb_NAME'), 
                               tempalte = True, dbservicename = "mongodb")

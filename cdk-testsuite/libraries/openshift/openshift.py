@@ -6,7 +6,6 @@ Created on Jun 29, 2016
 from avocado.utils import process
 import imp
 import logging
-import re
 import time
 
 log = logging.getLogger("Openshift.Debug")
@@ -174,78 +173,4 @@ def add_new_template(self, template):
     self.log.info ("Executing : " +strcmd2)
     time.sleep(2)
     output = process.system_output(strcmd2)
-    
     return output
-
-def new_project(self, url, username, password, projectname, registry, servicename, tempalte = False, dbservicename = "default"):
-    '''
-    Adding a new application to the project and returns output of the oc command executed
-    Args:
-        self (object): Object of the current method
-        username (string): username of openshift web console to be used
-        password (string): password of openshift web console to be used
-        projectname (string): name of the project to be added to the openshift server
-        registry (string): registry path/location
-        servicename (string): name of the service to be exposed outside
-        tempalte (boolean): if creating the s2i using openshift template then it takes value as True otherwise the default value False 
-        dbservicename (string): Takes the database service name if specified otherwise default
-    '''
-    output = oc_usr_login(self, url, username, password)
-    self.assertIn("Login successful", output, "Login failed")
-        
-    output = add_new_project(self, projectname)
-    self.assertIn(projectname, output, "Failed to create " +projectname)
-    
-    if not tempalte:
-        output = add_new_app(self, registry)
-        partenLst = []
-        lst = registry.split("/")
-        repo = lst[len(lst) - 1]
-        for lines in output.splitlines():
-            parten = re.search(r"^(?=.*?\b\\*\b)(?=.*?\bfailed\b)(?=.*?\b%s\b).*$" %repo, lines)
-            partenLst.append(parten)
-        match = "NotFound"
-        for i in partenLst:
-            if i != None:
-                match = "Found"
-                break
-        self.assertIn("NotFound", match, registry +" deployment failed")
-    else:
-        output = add_new_template(self, registry)
-        partenLst = []
-        for lines in output.splitlines():
-            parten = re.search(r"^(?=.*?\b\\*\b)(?=.*?\bfailed\b)(?=.*?\b%s\b).*$" %registry, lines)
-            partenLst.append(parten)
-        match = "NotFound"
-        for i in partenLst:
-            if i != None:
-                match = "Found"
-                break
-        self.assertIn("NotFound", match, registry +" deployment failed")
-        if "default" not in dbservicename:
-            del partenLst[:]
-            for lines in output.splitlines():
-                parten = re.search(r"^(?=.*?\bdeploys\b)(?=.*?\b%s\b)(?=.*?\bopenshift/%s\b).*$" %(dbservicename, dbservicename), lines)
-                partenLst.append(parten)
-            match = "NotFound"
-            for i in partenLst:
-                if i != None:
-                    match = "Found"
-                    break
-            self.assertIn("Found", match, dbservicename +" deployment failed")
-            
-    if not tempalte:    
-        output = oc_port_expose(self, servicename)
-        self.assertIn("exposed", output, "Service failed to expose " +projectname)
-    else:
-        pass
-                                
-    time.sleep(60)
-    output = xip_io(self, servicename, projectname)
-    self.assertIn("HTTP/1.1 200 OK", output, "curl -I http://" +servicename +"-" +projectname +".rhel-cdk.10.1.2.2.xip.io/ fail to expose to outside")
-                                    
-    output = oc_get_pod(self)
-    self.assertIn("Running", output, "Failed to run pod")
-                                        
-    output = oc_delete(self, projectname)
-    self.assertIn("deleted", output, "Failed to delete " +projectname)

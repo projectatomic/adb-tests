@@ -18,7 +18,7 @@ docker build -t etherpad \
 
 run_etherpad() {
   echo "
-[mariadb-atomicapp]
+[mariadb-centos7-atomicapp:mariadb-atomicapp]
   db_user = foo
   db_pass = foo
   db_name = foo

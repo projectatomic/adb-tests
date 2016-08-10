@@ -15,7 +15,7 @@ docker build -t wordpress \
 
 run_wordpress() {
   echo "
-[mariadb-atomicapp]
+[mariadb-centos7-atomicapp:mariadb-atomicapp]
   db_user = foo
   db_pass = foo
   db_name = foo

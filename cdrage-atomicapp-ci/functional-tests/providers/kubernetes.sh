@@ -14,7 +14,7 @@ start_k8s() {
   fi
 
   # Use alpha for now since this contains the new hyperkube format going forward
-  K8S_VERSION=1.3.0
+  K8S_VERSION=1.3.4
   docker run \
   --volume=/:/rootfs:ro \
   --volume=/sys:/sys:ro \

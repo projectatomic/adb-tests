@@ -35,7 +35,7 @@ install_atomic() {
   else
     rm -rf /usr/local/lib/python2.7/site-packages/Atomic/ /usr/local/lib/python2.7/site-packages/atomic-*
     rm -rf /usr/local/lib/python2.7/dist-packages/Atomic/ /usr/local/lib/python2.7/dist-packages/atomic-*
-    apt-get install -y make git python-selinux go-md2man python-pip python-dbus python-rpm python-pylint
+    apt-get install -y make git python-selinux go-md2man python-pip python-dbus python-rpm pylint
     ln /usr/local/bin/pylint /usr/bin/pylint
   fi
  

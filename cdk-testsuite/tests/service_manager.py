@@ -83,8 +83,9 @@ class service_manager(Test):
 				pass
 			else:
 				restart = vsm.vsm_service_handling(self.vagrant_VAGRANTFILE_DIR, "restart", "docker")
-				output = vsm.vsm_service_handling(self.vagrant_VAGRANTFILE_DIR, "status", "")
 				time.sleep(30)
+				output = vsm.vsm_service_handling(self.vagrant_VAGRANTFILE_DIR, "status", "")
+				
 				self.assertIn("docker - running" and "openshift - running" , output.stdout)
 				
 			

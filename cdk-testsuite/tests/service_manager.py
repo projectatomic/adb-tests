@@ -18,8 +18,9 @@ class service_manager(Test):
 		os.chdir(self.vagrant_BOX_PATH)
 		self.v = vagrant.Vagrant(self.vagrant_BOX_PATH)
 
-	def est_cdkbox_version(self):
+	def est_cdkbox_version(self):		
 		self.log.info(os.system("pwd"))
+
 		output = vsm.vsm_box_info(self.vagrant_BOX_PATH, "version", "--script-readable")
 		self.log.info(output)
 		print output
@@ -119,7 +120,7 @@ class service_manager(Test):
    	
 
    	def est_docker_version_host(self):
-   		(out,err)=vsm.instll_cli(self.vagrant_BOX_PATH, "docker", "docker version")
+   		(out,err)=vsm.instll_cli(self.vagrant_BOX_PATH, "docker",'', "docker version")
    		print out,err
    		if 'Client' and 'Server' in out:
    			pass
@@ -128,7 +129,7 @@ class service_manager(Test):
    		
 
    	def est_docker_images_host(self):
-   		(out,err)=vsm.instll_cli(self.vagrant_BOX_PATH, "docker", "docker images")
+   		(out,err)=vsm.instll_cli(self.vagrant_BOX_PATH, "docker", '',"docker images")
    		print out,err
    		if 'registry.access.redhat.com' in out:
    			pass
@@ -136,14 +137,14 @@ class service_manager(Test):
    			self.assertTrue(False)
 
    	def est_docker_ps(self):
-   		(out,err)=vsm.instll_cli(self.vagrant_BOX_PATH, "docker", "docker ps")
+   		(out,err)=vsm.instll_cli(self.vagrant_BOX_PATH, "docker",'', "docker ps")
    		print out,err
    		if 'openshift' in out:
    			pass
    		else:
    			self.assertTrue(False)
    	def est_docker_pull(self):
-   		(out,err)=vsm.instll_cli(self.vagrant_BOX_PATH, "docker", "docker pull tutum/hello-world")
+   		(out,err)=vsm.instll_cli(self.vagrant_BOX_PATH, "docker", '',"docker pull tutum/hello-world")
    		print out,err
    		if 'Status: Downloaded newer image for docker.io/tutum/hello-world:latest' in out:
    			pass
@@ -152,7 +153,7 @@ class service_manager(Test):
    	
    	
    	def est_docker_rmi(self):
-   		(out,err)=vsm.instll_cli(self.vagrant_BOX_PATH, "docker", "docker rmi tutum/hello-world")
+   		(out,err)=vsm.instll_cli(self.vagrant_BOX_PATH, "docker",'', "docker rmi tutum/hello-world")
    		print out,err
    		if 'Deleted' in out:
    			pass
@@ -162,7 +163,7 @@ class service_manager(Test):
 
    	def est_openshift_from_host_version(self):
 
-   		(out,err)=vsm.instll_cli(self.vagrant_BOX_PATH, "openshift", "oc version")
+   		(out,err)=vsm.instll_cli(self.vagrant_BOX_PATH, "openshift",'', "oc version")
    		print out,err
    		if 'oc v1.2.1' in out:
    			pass
@@ -170,7 +171,7 @@ class service_manager(Test):
    			self.assertTrue(False)
    	def est_openshift_from_host_version(self):
 
-   		(out,err)=vsm.instll_cli(self.vagrant_BOX_PATH, "openshift", "oc version")
+   		(out,err)=vsm.instll_cli(self.vagrant_BOX_PATH, "openshift", '',"oc version")
    		print out,err
    		if 'oc v1.2.1' in out:
    			pass
@@ -182,7 +183,7 @@ class service_manager(Test):
    		out=out.replace('ESC[0m','')
    		ips = re.findall('(?:[\d]{1,3})\.(?:[\d]{1,3})\.(?:[\d]{1,3})\.(?:[\d]{1,3})',out)
 		print ips[0]
-   		(out,err)=vsm.instll_cli(self.vagrant_BOX_PATH, "openshift", "oc login " +ips[0]+" --username=openshift-dev "+" --password=devel  --insecure-skip-tls-verify")
+   		(out,err)=vsm.instll_cli(self.vagrant_BOX_PATH, "openshift",'', "oc login " +ips[0]+" --username=openshift-dev "+" --password=devel  --insecure-skip-tls-verify")
    		print out,err
    		
    		if 'Login successful' in out:
@@ -193,12 +194,12 @@ class service_manager(Test):
    		
    		
    	
-   	def test_openshift_newproject_host(self):
+   	def est_openshift_newproject_host(self):
    		(out,err)=vsm.box_ip(self.vagrant_BOX_PATH,'ip')
    		out=out.replace('ESC[0m','')
    		ips = re.findall('(?:[\d]{1,3})\.(?:[\d]{1,3})\.(?:[\d]{1,3})\.(?:[\d]{1,3})',out)
 		print ips[0]
-   		(out,err)=vsm.instll_cli(self.vagrant_BOX_PATH, "openshift", "oc login " +ips[0]+" --username=openshift-dev "+" --password=devel  --insecure-skip-tls-verify;oc new-project test-project")
+   		(out,err)=vsm.instll_cli(self.vagrant_BOX_PATH, "openshift",'', "oc login " +ips[0]+" --username=openshift-dev "+" --password=devel  --insecure-skip-tls-verify;oc new-project test-project")
    		print out,err
 		   		
    		if 'test-project' in out:
@@ -207,3 +208,10 @@ class service_manager(Test):
    		else:
    			self.assertTrue(False)
    		
+   	def test_install_cli_with_versions(self):
+   		(out,err)=vsm.instll_cli(self.vagrant_BOX_PATH, "docker",'--cli-version 1.12.1', "docker version")
+   		print out,err
+   		if '1.12.1' in out:
+   			pass
+   		else:
+   			self.assertTrue(False)

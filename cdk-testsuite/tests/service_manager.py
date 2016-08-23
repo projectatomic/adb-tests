@@ -11,207 +11,151 @@ vsm = imp.load_source('vsm', '../Logic/vsm.py')
 class service_manager(Test):
 	def setUp(self):
 		self.log.info("setup")
-		self.vagrant_BOX_PATH=self.params.get('vagrant_BOX_PATH')
+		self.vagrant_VAGRANTFILE_DIR=self.params.get('vagrant_VAGRANTFILE_DIR')
 		self.vagrant_PLUGIN_PATH=self.params.get('vagrant_PLUGIN_PATH')	
 		self.service = self.params.get('service', default='')
 		self.vagrant_PROVIDER = self.params.get('vagrant_PROVIDER', default='hyperv')
-		os.chdir(self.vagrant_BOX_PATH)
-		self.v = vagrant.Vagrant(self.vagrant_BOX_PATH)
+		os.chdir(self.vagrant_VAGRANTFILE_DIR)
+		self.v = vagrant.Vagrant(self.vagrant_VAGRANTFILE_DIR)
 
-	def est_cdkbox_version(self):		
-		self.log.info(os.system("pwd"))
-
-		output = vsm.vsm_box_info(self.vagrant_BOX_PATH, "version", "--script-readable")
-		self.log.info(output)
+	def test_cdkbox_version(self):		
+		output = vsm.vsm_box_info(self.vagrant_VAGRANTFILE_DIR, "version", "--script-readable")	
 		print output
-		if "Container Development Kit (CDK)" in output.stdout:
-			pass
-
-		else:
-			self.assertEquals("Container Development Kit(CDK)",output.stdout)
-	def  est_vsm_box_ip(self):
-		output = vsm.vsm_box_info(self.vagrant_BOX_PATH, "ip", "")
+		self.assertIn("Container Development Kit (CDK)",out.stdout)
+		
+	def  test_vsm_box_ip(self):
+		output = vsm.vsm_box_info(self.vagrant_VAGRANTFILE_DIR, "ip", "")
 		ip = output.stdout
 		ips = re.findall('(?:[\d]{1,3})\.(?:[\d]{1,3})\.(?:[\d]{1,3})\.(?:[\d]{1,3})',ip)
 		print ips[0]
-		if ips[0] != None:
-			pass
-		else: 
-			self.assertTrue(False)
+		self.assertTrue(ips[0])
 		
-	def est_env_info_docker(self):
+	def test_env_info_docker(self):
 
-		output = vsm.vsm_env_info(self.vagrant_BOX_PATH, "docker","--script-readable")
+		output = vsm.vsm_env_info(self.vagrant_VAGRANTFILE_DIR, "docker","--script-readable")
 		print output.stdout
-		if "DOCKER_HOST" and "DOCKER_CERT_PATH" and "DOCKER_TLS_VERIFY" and "DOCKER_API_VERSION" in output.stdout:
-			print "Test pass"
-			pass
-		else:
-			self.assertTrue(False)
+		self.assertIn("DOCKER_HOST" and "DOCKER_CERT_PATH" and "DOCKER_TLS_VERIFY" and "DOCKER_API_VERSION" , output.stdout)
+		
 
-
-	def est_env_info_openshift(self):
-		output = vsm.vsm_env_info(self.vagrant_BOX_PATH, "openshift","--script-readable")
+	def test_env_info_openshift(self):
+		output = vsm.vsm_env_info(self.vagrant_VAGRANTFILE_DIR, "openshift","--script-readable")
 		print output.stdout
-		if "OPENSHIFT_URL" and "OPENSHIFT_WEB_CONSOLE" and "DOCKER_REGISTRY"  in output.stdout:
-			print "Test pass"
-			pass
-		else:
-			self.assertTrue(False)
+		self.assertIn("OPENSHIFT_URL" and "OPENSHIFT_WEB_CONSOLE" and "DOCKER_REGISTRY" , output.stdout)
+		
 
-	def est_vsm_status_of_docker_service_running(self):
-		output = vsm.vsm_service_handling(self.vagrant_BOX_PATH, "status", "docker")
+	def test_vsm_status_of_docker_service_running(self):
+		output = vsm.vsm_service_handling(self.vagrant_VAGRANTFILE_DIR, "status", "docker")
 		print output.stdout
-		if "docker - running" in output.stdout:
-			pass
-		else:
-			self.assertTrue(False)
+		self.assertIn("docker - running",output.stdout)
+		
 
-	def est_vsm_status_openshift_service_running(self):
-		output = vsm.vsm_service_handling(self.vagrant_BOX_PATH, "status", "openshift")
+	def test_vsm_status_openshift_service_running(self):
+		output = vsm.vsm_service_handling(self.vagrant_VAGRANTFILE_DIR, "status", "openshift")
 		print output.stdout
-		if "openshift - running" in output.stdout:
-			pass
-		else:
-			self.assertTrue(False)
+		self.assertIn("docker - running",output.stdout)
+		
+		
 	
-	def est_stop_openshift_service_start_again(self):
-		vsm.vsm_service_handling(self.vagrant_BOX_PATH, "stop", "openshift")
-		output = vsm.vsm_service_handling(self.vagrant_BOX_PATH, "status", "openshift")
+	def test_stop_openshift_service_start_again(self):
+		vsm.vsm_service_handling(self.vagrant_VAGRANTFILE_DIR, "stop", "openshift")
+		output = vsm.vsm_service_handling(self.vagrant_VAGRANTFILE_DIR, "status", "openshift")
 		print output.stdout
 		if "openshift - stopped" in output.stdout:
-			restart = vsm.vsm_service_handling(self.vagrant_BOX_PATH, "start", "openshift")
-			output = vsm.vsm_service_handling(self.vagrant_BOX_PATH, "status", "openshift")
-		
+			restart = vsm.vsm_service_handling(self.vagrant_VAGRANTFILE_DIR, "start", "openshift")
+			output = vsm.vsm_service_handling(self.vagrant_VAGRANTFILE_DIR, "status", "openshift")
 			time.sleep(20)
-			if "openshift - running" in output.stdout:
-				pass
-			else:
-				self.assertTrue(False)
-			pass
+			self.assertIn("openshift - running" , output.stdout)
+			
 		else:
-			self.assertTrue(False)
+			self.assertTrue("openshift - running" , output.stdout)
 		
-	def est_stop_docker_service_start_again(self):
-		vsm.vsm_service_handling(self.vagrant_BOX_PATH, "stop", "docker")
-		output = vsm.vsm_service_handling(self.vagrant_BOX_PATH, "status", "docker")
+	def test_stop_docker_service_start_again(self):
+		vsm.vsm_service_handling(self.vagrant_VAGRANTFILE_DIR, "stop", "docker")
+		output = vsm.vsm_service_handling(self.vagrant_VAGRANTFILE_DIR, "status", "docker")
 		print output.stdout
 		if "docker - stopped" in output.stdout:
-			restart = vsm.vsm_service_handling(self.vagrant_BOX_PATH, "start", "docker")
-			output = vsm.vsm_service_handling(self.vagrant_BOX_PATH, "status", "")
+			restart = vsm.vsm_service_handling(self.vagrant_VAGRANTFILE_DIR, "start", "docker")
+			output = vsm.vsm_service_handling(self.vagrant_VAGRANTFILE_DIR, "status", "")
 		
 			time.sleep(20)
 			if "docker - running" and "openshift - running" in output.stdout:
 				pass
 			else:
-				restart = vsm.vsm_service_handling(self.vagrant_BOX_PATH, "restart", "docker")
-				output = vsm.vsm_service_handling(self.vagrant_BOX_PATH, "status", "")
+				restart = vsm.vsm_service_handling(self.vagrant_VAGRANTFILE_DIR, "restart", "docker")
+				output = vsm.vsm_service_handling(self.vagrant_VAGRANTFILE_DIR, "status", "")
 				time.sleep(30)
-				if "docker - running" and "openshift - running" in output.stdout:
-					pass
-				else:
-
-					self.assertTrue(False)
-			pass
+				self.assertIn("docker - running" and "openshift - running" , output.stdout)
+				
+			
 		else:
-			self.assertTrue(False)
+			self.assertIn("docker - running" , output.stdout)
 		
 
    	
 
-   	def est_docker_version_host(self):
-   		(out,err)=vsm.instll_cli(self.vagrant_BOX_PATH, "docker",'', "docker version")
+   	def test_docker_version_host(self):
+   		(out,err)=vsm.instll_cli(self.vagrant_VAGRANTFILE_DIR, "docker",'', "docker version")
    		print out,err
-   		if 'Client' and 'Server' in out:
-   			pass
-   		else:
-   			self.assertTrue(False)
+   		self.assertIn('Client' and 'Server',out)
    		
 
-   	def est_docker_images_host(self):
-   		(out,err)=vsm.instll_cli(self.vagrant_BOX_PATH, "docker", '',"docker images")
+   	def test_docker_images_host(self):
+   		(out,err)=vsm.instll_cli(self.vagrant_VAGRANTFILE_DIR, "docker", '',"docker images")
    		print out,err
-   		if 'registry.access.redhat.com' in out:
-   			pass
-   		else:
-   			self.assertTrue(False)
-
-   	def est_docker_ps(self):
-   		(out,err)=vsm.instll_cli(self.vagrant_BOX_PATH, "docker",'', "docker ps")
-   		print out,err
-   		if 'openshift' in out:
-   			pass
-   		else:
-   			self.assertTrue(False)
-   	def est_docker_pull(self):
-   		(out,err)=vsm.instll_cli(self.vagrant_BOX_PATH, "docker", '',"docker pull tutum/hello-world")
-   		print out,err
-   		if 'Status: Downloaded newer image for docker.io/tutum/hello-world:latest' in out:
-   			pass
-   		else:
-   			self.assertTrue(False)
-   	
-   	
-   	def est_docker_rmi(self):
-   		(out,err)=vsm.instll_cli(self.vagrant_BOX_PATH, "docker",'', "docker rmi tutum/hello-world")
-   		print out,err
-   		if 'Deleted' in out:
-   			pass
-   		else:
-   			self.assertTrue(False)
-
-
-   	def est_openshift_from_host_version(self):
-
-   		(out,err)=vsm.instll_cli(self.vagrant_BOX_PATH, "openshift",'', "oc version")
-   		print out,err
-   		if 'oc v1.2.1' in out:
-   			pass
-   		else:
-   			self.assertTrue(False)
-   	def est_openshift_from_host_version(self):
-
-   		(out,err)=vsm.instll_cli(self.vagrant_BOX_PATH, "openshift", '',"oc version")
-   		print out,err
-   		if 'oc v1.2.1' in out:
-   			pass
-   		else:
-   			self.assertTrue(False)
+   		self.assertIn('registry.access.redhat.com',out)
    		
-   	def est_openshift_login_host(self):
-   		(out,err)=vsm.box_ip(self.vagrant_BOX_PATH,'ip')
+
+   	def test_docker_ps(self):
+   		(out,err)=vsm.instll_cli(self.vagrant_VAGRANTFILE_DIR, "docker",'', "docker ps")
+   		print out,err
+   		self.assertIn('openshift',out)
+   		
+   	def test_docker_pull(self):
+   		(out,err)=vsm.instll_cli(self.vagrant_VAGRANTFILE_DIR, "docker", '',"docker pull tutum/hello-world")
+   		print out,err
+   		self.assertIn('Status: Downloaded newer image for docker.io/tutum/hello-world:latest',out)
+   		
+   	
+   	def test_docker_rmi(self):
+   		(out,err)=vsm.instll_cli(self.vagrant_VAGRANTFILE_DIR, "docker",'', "docker rmi tutum/hello-world")
+   		print out,err
+   		self.assertIn('Deleted',out)
+   		
+
+   	def test_openshift_from_host_version(self):
+
+   		(out,err)=vsm.instll_cli(self.vagrant_VAGRANTFILE_DIR, "openshift",'', "oc version")
+   		print out,err
+   		self.assertIn('oc v1.2.1',out)
+   	
+   	def test_openshift_from_host_version(self):
+
+   		(out,err)=vsm.instll_cli(self.vagrant_VAGRANTFILE_DIR, "openshift", '',"oc version")
+   		print out,err
+   		self.assertIn('oc v1.2.1',out)
+   		
+   	def test_openshift_login_host(self):
+   		(out,err)=vsm.box_ip(self.vagrant_VAGRANTFILE_DIR,'ip')
    		out=out.replace('ESC[0m','')
    		ips = re.findall('(?:[\d]{1,3})\.(?:[\d]{1,3})\.(?:[\d]{1,3})\.(?:[\d]{1,3})',out)
 		print ips[0]
-   		(out,err)=vsm.instll_cli(self.vagrant_BOX_PATH, "openshift",'', "oc login " +ips[0]+" --username=openshift-dev "+" --password=devel  --insecure-skip-tls-verify")
+   		(out,err)=vsm.instll_cli(self.vagrant_VAGRANTFILE_DIR, "openshift",'', "oc login " +ips[0]+" --username=openshift-dev "+" --password=devel  --insecure-skip-tls-verify")
    		print out,err
-   		
-   		if 'Login successful' in out:
-   			pass
-
-   		else:
-   			self.assertTrue(False)
+   		self.assertIn('Login successful',out)
    		
    		
    	
-   	def est_openshift_newproject_host(self):
-   		(out,err)=vsm.box_ip(self.vagrant_BOX_PATH,'ip')
+   	def test_openshift_newproject_host(self):
+   		(out,err)=vsm.box_ip(self.vagrant_VAGRANTFILE_DIR,'ip')
    		out=out.replace('ESC[0m','')
    		ips = re.findall('(?:[\d]{1,3})\.(?:[\d]{1,3})\.(?:[\d]{1,3})\.(?:[\d]{1,3})',out)
 		print ips[0]
-   		(out,err)=vsm.instll_cli(self.vagrant_BOX_PATH, "openshift",'', "oc login " +ips[0]+" --username=openshift-dev "+" --password=devel  --insecure-skip-tls-verify;oc new-project test-project")
+   		(out,err)=vsm.instll_cli(self.vagrant_VAGRANTFILE_DIR, "openshift",'', "oc login " +ips[0]+" --username=openshift-dev "+" --password=devel  --insecure-skip-tls-verify;oc new-project test-project")
    		print out,err
-		   		
-   		if 'test-project' in out:
-   			pass
-
-   		else:
-   			self.assertTrue(False)
+		self.assertIn('test-project',out)  		
+   		
    		
    	def test_install_cli_with_versions(self):
-   		(out,err)=vsm.instll_cli(self.vagrant_BOX_PATH, "docker",'--cli-version 1.12.1', "docker version")
+   		(out,err)=vsm.instll_cli(self.vagrant_VAGRANTFILE_DIR, "docker",'--cli-version 1.12.1', "docker version")
    		print out,err
-   		if '1.12.1' in out:
-   			pass
-   		else:
-   			self.assertTrue(False)
+   		self.assertIn('1.12.1',out)

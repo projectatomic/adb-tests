@@ -62,9 +62,9 @@ def vsm_is_service_running(vagrant_BOX_PATH, service):
     except:
 	print "Could NOT get the status of the service. Maybe something went wrong..."
 
-def instll_cli(vagrant_BOX_PATH, service,command):
+def instll_cli(vagrant_BOX_PATH, service,version,command):
     os.chdir(vagrant_BOX_PATH)
-    env_vars = subprocess.Popen('eval "$(VAGRANT_NO_COLOR=1 vagrant service-manager env '+service+' | tr -d \'\r\')";eval "$(vagrant service-manager install-cli '+service+' | tr -d \'\r\')";'+command+'',  stdout=subprocess.PIPE, shell=True)
+    env_vars = subprocess.Popen('eval "$(VAGRANT_NO_COLOR=1 vagrant service-manager env '+service+' | tr -d \'\r\')";eval "$(vagrant service-manager install-cli '+service+' '+version+' | tr -d \'\r\')";'+command+'',  stdout=subprocess.PIPE, shell=True)
     (output1, err1) = env_vars.communicate()
     return output1,err1
 

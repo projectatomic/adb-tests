@@ -76,9 +76,8 @@ class service_manager(Test):
 		print output.stdout
 		if "docker - stopped" in output.stdout:
 			restart = vsm.vsm_service_handling(self.vagrant_VAGRANTFILE_DIR, "start", "docker")
-			output = vsm.vsm_service_handling(self.vagrant_VAGRANTFILE_DIR, "status", "")
-		
 			time.sleep(20)
+			output = vsm.vsm_service_handling(self.vagrant_VAGRANTFILE_DIR, "status", "")
 			if "docker - running" and "openshift - running" in output.stdout:
 				pass
 			else:

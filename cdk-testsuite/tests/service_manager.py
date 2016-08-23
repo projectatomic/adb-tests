@@ -62,8 +62,9 @@ class service_manager(Test):
 		print output.stdout
 		if "openshift - stopped" in output.stdout:
 			restart = vsm.vsm_service_handling(self.vagrant_VAGRANTFILE_DIR, "start", "openshift")
-			output = vsm.vsm_service_handling(self.vagrant_VAGRANTFILE_DIR, "status", "openshift")
 			time.sleep(20)
+			output = vsm.vsm_service_handling(self.vagrant_VAGRANTFILE_DIR, "status", "openshift")
+			
 			self.assertIn("openshift - running" , output.stdout)
 			
 		else:

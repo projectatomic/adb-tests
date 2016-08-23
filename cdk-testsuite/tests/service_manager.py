@@ -52,7 +52,7 @@ class service_manager(Test):
 	def test_vsm_status_openshift_service_running(self):
 		output = vsm.vsm_service_handling(self.vagrant_VAGRANTFILE_DIR, "status", "openshift")
 		print output.stdout
-		self.assertIn("docker - running",output.stdout)
+		self.assertIn("openshift - running",output.stdout)
 		
 		
 	

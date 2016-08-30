@@ -8,6 +8,7 @@ from avocado import VERSION
 import imp
 import logging
 import os
+import platform
 import re
 
 log = logging.getLogger("Openshift.Debug")
@@ -74,17 +75,16 @@ def new_project(self, url, username, password, projectname, registry, servicenam
         self.assertIn("exposed", output, "Service failed to expose " +projectname)
     else:
         pass
-    """                            
-    time.sleep(60)
-    output = openshift.xip_io(self, servicename, projectname)
-    self.assertIn("HTTP/1.1 200 OK", output, "curl -I http://" +servicename +"-" +projectname +".rhel-cdk.10.1.2.2.xip.io/ fail to expose to outside")
-    """                                
+                                
+    output = openshift.landrush_cdk(self, servicename, projectname)
+    self.assertIn("HTTP/1.1 200 OK", output, "curl -I http://" +servicename +"-" +projectname +".cdk/ fail to expose to outside")
+                                    
     output = openshift.oc_get_pod(self)
     self.assertIn("Running", output, "Failed to run pod")
                                         
     output = openshift.oc_delete(self, projectname)
     self.assertIn("deleted", output, "Failed to delete " +projectname)
-
+    
 class OpenshiftTests(Test):
 
     def setUp(self):
@@ -93,15 +93,15 @@ class OpenshiftTests(Test):
         Arg:
             self (object): Object of the current method
         '''
-        if os.name == "posix":
+        if platform.system() == "Linux":
             os.chdir(self.params.get('path_linux'))
             self.log.info(self.params.get('path_linux'))
-        elif os.name == "nt":
-            os.chdir(self.params.get('path_win'))
-            self.log.info(self.params.get('path_win'))
-        else:
+        elif platform.system() == "Darwin":
             os.chdir(self.params.get('path_mac'))
             self.log.info(self.params.get('path_mac'))
+        else:
+            os.chdir(self.params.get('path_win'))
+            self.log.info(self.params.get('path_win'))
         global openshift
         openshift = imp.load_source('openshift', self.params.get('openshift_lib_MODULE'))
         self.log.info("###########################################################################################")
@@ -132,7 +132,7 @@ class OpenshiftTests(Test):
         new_project(self, self.params.get('openshift_URL'), self.params.get('openshift_USERNAME'), 
                               self.params.get('openshift_PASSWORD'), self.params.get('openshift_python_PROJECT'), 
                               self.params.get('openshift_python_REGISTRY'), self.params.get('service_python_NAME'))
-    
+        
     def test_ruby_project(self):
         '''
         Runs sanity on openshift s2i ruby source

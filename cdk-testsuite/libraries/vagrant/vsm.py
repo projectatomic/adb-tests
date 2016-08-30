@@ -41,13 +41,6 @@ def vsm_service_handling(vagrant_BOX_PATH, operation, service):
     out = process.run(cmd, shell=True)
     return out
 
-def vsm_binaries_handling(vagrant_BOX_PATH, operation, service):
-    ''' method to start/stop/restart and get status of 
-        services and returns the output of the cmd '''
-    os.chdir(vagrant_BOX_PATH)
-    cmd = "vagrant service-manager %s %s" %(operation, service)
-    out = process.run(cmd, shell=True)
-    return out
 
 def vsm_is_service_running(vagrant_BOX_PATH, service):
     ''' checks status of service and returns True if running '''

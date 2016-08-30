@@ -5,10 +5,11 @@ import subprocess
 from avocado.utils import process
 
 
-def vsm_plugin_install():
+def vsm_plugin_install(vagrant_PLUGIN_DIR):
     ''' method installs the cdk vagrant plugins '''
     ''' returns the output of the vagrant plugin install cmd '''
-    cmd = "vagrant plugin install ./vagrant-registration-*.gem ./vagrant-sshfs-*.gem ./vagrant-service-manager-*.gem"
+    os.chdir(vagrant_PLUGIN_DIR)
+    cmd = "vagrant plugin install ./vagrant-registration-*.gem ./vagrant-sshfs-*.gem ./vagrant-service-manager-*.gem ./landrush-*.gem "
     out = process.run(cmd, shell=True)
     return out
 

@@ -1,0 +1,6 @@
+
+vagrant_VAGRANTFILE_DIR: ""
+vagrant_PROVIDER: ""
+vagrant_RHN_USERNAME: ""
+vagrant_RHN_PASSWORD: ""
+sudo_PASSWORD: ""

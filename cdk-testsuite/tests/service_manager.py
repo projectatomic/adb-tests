@@ -21,7 +21,7 @@ class service_manager(Test):
 	def test_cdkbox_version(self):		
 		output = vsm.vsm_box_info(self.vagrant_VAGRANTFILE_DIR, "version", "--script-readable")	
 		print output
-		self.assertIn("Container Development Kit (CDK)",out.stdout)
+		self.assertIn("Container Development Kit (CDK)",output.stdout)
 		
 	def  test_vsm_box_ip(self):
 		output = vsm.vsm_box_info(self.vagrant_VAGRANTFILE_DIR, "ip", "")

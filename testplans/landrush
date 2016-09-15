@@ -1,0 +1,69 @@
+# Test plan for landrush with CDK
+
+Landrush manages DNS for vagrant VMs. It spins up a small DNS server and redirects DNS traffic from your VMs to use it, automatically registering/unregistering IP addresses of guests as they come up and go down. ( https://github.com/vagrant-landrush/landrush )
+
+#### Usage
+
+To use landrush with CDK, the following steps have to be followed :-
+1) Installation of landrush plugin: Install landrush plugin during plugin installation
+2) Landrush config in Vagrantfile: The vagrantfile should contain the configuration details for using landrush with openshift
+
+### Testcases
+
+1) Installation of landrush plugin for vagrant
+
+   Steps:
+   a) Download CDK.zip
+   b) While installing plugins, install landrush-*.gem
+
+   Expected output:
+   a) `vagrant plugin ls` should list the landrush plugin
+
+2) Check for landrush config in vagrantfile
+
+   Expected output:
+   a) Vagrantfile must have landrush enabled
+
+3) Bring up vagrant instance with landrush enabled
+
+   Steps:
+   a) Change to rhel-ose: cdk/components/rhel/rhel-ose
+   b) Run `vagrant up`
+
+   Expected output:
+   a) Landrush DNS configuration should be executed by the Vagrantfile
+   b) The Vagrant VM should dynamically pick up an IP
+   c) Login into vagrant vm by running `vagrant ssh` and check if the changes are seen in /etc/sysconfig/openshift_option after running the vagrantfile
+
+4) vagrant landrush commands: ls
+
+   Steps:  `vagrant landrush ls`
+
+   Expected output:
+   Should have a mapping between host and the ip:
+   Eg. output:
+
+   cdk.vm                     192.168.121.183
+   183.121.168.192.in-addr.arpa   cdk.vm
+   cdk                            cdk.vm
+
+5) vagrant landrush commands: status
+
+   Steps:  `vagrant landrush status`
+
+   Expected output: Should list the pid of the landrush server
+
+6) Landrush dns checks: `cat /etc/resolv.conf`
+
+   Expected output:
+   1) Entry on the host by landrush: `cat /etc/resolv.conf`
+   2) cdk.vm should be reachable from the host
+
+7) Application route:
+
+   Steps:
+   1) Create an openshift application
+   2) Once the application is create, create a route for the application
+   
+   Expected output:
+   The *.cdk route created should be valid URL

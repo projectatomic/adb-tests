@@ -103,7 +103,7 @@ def oc_port_expose(self, service_name):
         service_name (str): name of the service to be exposed outside
     '''
     strcmd = "vagrant ssh -c 'oc expose service " +service_name +"'"
-    time.sleep(10)
+    time.sleep(60)
     output = "FAIL"
     try:
         output = process.system_output(strcmd)
@@ -139,7 +139,7 @@ def oc_get_pod(self):
         return output
     return output
 
-def landrush_cdk(self, service_name, openshift_project_name):
+def routing_cdk(self, service_name, openshift_project_name):
     '''
     Runs landrush server returns output of the oc command executed
     Args:
@@ -147,11 +147,15 @@ def landrush_cdk(self, service_name, openshift_project_name):
         service_name (string): name of the service to be exposed outside
         openshift_project_name (string): name of the project to be added to the openshift server
     '''
-    strcmd = "curl -I http://" +service_name +"-" +openshift_project_name +".cdk/"
+    time.sleep(60)
     output = "FAIL"
-    time.sleep(30)
+    strcmd = "vagrant ssh -c 'oc get route'"
     try:
         output = process.system_output(strcmd)
+        for lines in output.split():
+            if service_name +"-" +openshift_project_name in lines:
+                strcmd = "curl -I http://" +lines
+                output = process.system_output(strcmd)
     except:
         return output
     return output

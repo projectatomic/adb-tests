@@ -76,8 +76,8 @@ def new_project(self, url, username, password, projectname, registry, servicenam
     else:
         pass
                                 
-    output = openshift.landrush_cdk(self, servicename, projectname)
-    self.assertIn("HTTP/1.1 200 OK", output, "curl -I http://" +servicename +"-" +projectname +".cdk/ fail to expose to outside")
+    output = openshift.routing_cdk(self, servicename, projectname)
+    self.assertIn("HTTP/1.1 200 OK", output, "Service " +servicename +"-" +projectname +" fail to expose to outside")
                                     
     output = openshift.oc_get_pod(self)
     self.assertIn("Running", output, "Failed to run pod")
@@ -258,6 +258,7 @@ class OpenshiftTests(Test):
                               self.params.get('openshift_nodejsmongodb_TEMPLATE'), self.params.get('service_nodejsmongodb_NAME'), 
                               tempalte = True, dbservicename = "mongodb")
     
+        
     def test_logout(self):
         '''
         Loging out the test from openshift server

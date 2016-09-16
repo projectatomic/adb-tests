@@ -1,14 +1,14 @@
 #Set the path correspondence to the vagrant file
-path_linux : '/path/to/vagtantupdir'
+path_linux : '/home/amit/openshift/07-Sep-2016.rc4/cdk/components/rhel/rhel-ose'
 path_win : '/path/to/vagtantupdir'
 path_mac : '/path/to/vagtantupdir'
 #Set the path openshift library module
-openshift_lib_MODULE : '/path/to/openshift/library/module'
-openshift_util_MODULE : '/path/to/openshift/util/module'
+openshift_lib_MODULE : '/home/amit/workspace/cdk-testsuite/libraries/openshift/openshift.py'
+openshift_util_MODULE : '/home/amit/workspace/cdk-testsuite/utils/openshiftUtils.py'
 #Set openshift credentials
 openshift_USERNAME : 'openshift-dev'
 openshift_PASSWORD : 'devel'
-openshift_URL : '10.1.2.2:8443'
+openshift_WC_PORT : '8443'
 #Set the project inputs (python project name, python registry path and python service name). It uses image from redhat registry.
 openshift_python_PROJECT : 'test-python27'
 openshift_python_REGISTRY : 'registry.access.redhat.com/rhscl/python-27-rhel7~https://github.com/openshift/django-ex' 

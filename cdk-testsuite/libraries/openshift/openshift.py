@@ -19,7 +19,7 @@ def openshiftLibInfo(self):
     openshiftUtils = imp.load_source('openshiftUtils', self.params.get('openshift_util_MODULE'))
     self.log.info("Openshift library version : " +openshiftUtils.get_version())
     
-def oc_usr_login(self, ip_port, uname, password):
+def oc_usr_login(self, port, uname, password):
     '''
     Login to openshift server and returns output of the oc command executed
     Args:
@@ -29,9 +29,11 @@ def oc_usr_login(self, ip_port, uname, password):
         password (str): password of openshift web console to be used
     '''
     output = "FAIL"
-    strcmd = "vagrant ssh -c 'oc login " +ip_port +" --username=" +uname +" --password=" +password +" --insecure-skip-tls-verify" +"'"
-    self.log.info ("Executing : " +strcmd)
     try:
+        ip = process.system_output("vagrant service-manager box ip")
+        self.log.info ("Box ip is : " +ip.strip())
+        strcmd = "vagrant ssh -c 'oc login " +ip.strip() +":" +port +" --username=" +uname +" --password=" +password +" --insecure-skip-tls-verify" +"'"
+        self.log.info ("Executing : " +strcmd)
         output = process.system_output(strcmd)
     except:
         return output

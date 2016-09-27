@@ -1,5 +1,5 @@
 #Set the path correspondence to the vagrant file
-path_linux : '/home/amit/openshift/07-Sep-2016.rc4/cdk/components/rhel/rhel-ose'
+path_linux : '/path/to/vagtantupdir'
 path_win : '/path/to/vagtantupdir'
 path_mac : '/path/to/vagtantupdir'
 #Set the path openshift library module

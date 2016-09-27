@@ -6,6 +6,7 @@ Created on Jun 29, 2016
 from avocado.utils import process
 import imp
 import logging
+import re
 import time
 
 log = logging.getLogger("Openshift.Debug")
@@ -24,15 +25,16 @@ def oc_usr_login(self, port, uname, password):
     Login to openshift server and returns output of the oc command executed
     Args:
         self (object): Object of the current method
-        ip_port (str): ip and port of openshift to be used
+        port (str): port of openshift to be used
         uname (str): username of openshift web console to be used
         password (str): password of openshift web console to be used
     '''
     output = "FAIL"
     try:
         ip = process.system_output("vagrant service-manager box ip")
-        self.log.info ("Box ip is : " +ip.strip())
-        strcmd = "vagrant ssh -c 'oc login " +ip.strip() +":" +port +" --username=" +uname +" --password=" +password +" --insecure-skip-tls-verify" +"'"
+        ip = re.findall('(?:[\d]{1,3})\.(?:[\d]{1,3})\.(?:[\d]{1,3})\.(?:[\d]{1,3})',ip)
+        self.log.info ("Box ip is : " +ip[0].strip())
+        strcmd = "vagrant ssh -c 'oc login " +ip[0].strip() +":" +port +" --username=" +uname +" --password=" +password +" --insecure-skip-tls-verify" +"'"
         self.log.info ("Executing : " +strcmd)
         output = process.system_output(strcmd)
     except:

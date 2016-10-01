@@ -17,6 +17,7 @@ def openshiftLibInfo(self):
     Args:
         self (object): Object of the current method
     '''
+    global openshiftUtils
     openshiftUtils = imp.load_source('openshiftUtils', self.params.get('openshift_util_MODULE'))
     self.log.info("Openshift library version : " +openshiftUtils.get_version())
     
@@ -29,14 +30,13 @@ def oc_usr_login(self, port, uname, password):
         uname (str): username of openshift web console to be used
         password (str): password of openshift web console to be used
     '''
-    output = "FAIL"
     try:
         ip = process.system_output("vagrant service-manager box ip")
         ip = re.findall('(?:[\d]{1,3})\.(?:[\d]{1,3})\.(?:[\d]{1,3})\.(?:[\d]{1,3})',ip)
         self.log.info ("Box ip is : " +ip[0].strip())
         strcmd = "vagrant ssh -c 'oc login " +ip[0].strip() +":" +port +" --username=" +uname +" --password=" +password +" --insecure-skip-tls-verify" +"'"
         self.log.info ("Executing : " +strcmd)
-        output = process.system_output(strcmd)
+        output = openshiftUtils.wait_for_output(strcmd)
     except:
         return output
     return output
@@ -48,14 +48,9 @@ def add_new_project(self, project_name):
         self (object): Object of the current method
         project_name (str): name of the project to be added to the openshift server
     '''
-    output = "FAIL"
     strcmd = "vagrant ssh -c 'oc new-project " +project_name +"'"
     self.log.info ("Executing : " +strcmd)
-    time.sleep(2)
-    try:
-        output = process.system_output(strcmd)
-    except:
-        return output
+    output = openshiftUtils.wait_for_output(strcmd)
     return output
 
 def add_new_app(self, registry):
@@ -65,17 +60,13 @@ def add_new_app(self, registry):
         self (object): Object of the current method
         registry (str): registry path/location
     '''
-    output = "FAIL"
     strcmd = "vagrant ssh -c 'oc new-app " +registry +"'"
     lst = registry.split("/")
     repo = lst[len(lst) - 1]
     self.log.info ("Executing : " +strcmd)
-    time.sleep(2)
-                
     lst = []
-    try:
-        output = process.system_output(strcmd)
-    except:
+    output = openshiftUtils.wait_for_output(strcmd)
+    if output == "FAIL":
         return output
     for lines in output.splitlines():
         if repo in lines:
@@ -84,19 +75,13 @@ def add_new_app(self, registry):
     lst = lst[len(lst) - 1].split("'") 
     strcmd1 = "vagrant ssh -c " +"'" +lst[1] +"'"
     self.log.info ("Executing : " +strcmd1) 
-    time.sleep(60)
                        
-    try:
-        output = process.system_output(strcmd1)
-    except:
+    output = openshiftUtils.wait_for_output(strcmd1)
+    if output == "FAIL":
         return output
     strcmd2 = "vagrant ssh -c 'oc status -v'"
     self.log.info ("Executing : " +strcmd2)
-    time.sleep(2)
-    try:
-        output = process.system_output(strcmd2)
-    except:
-        return output
+    output = openshiftUtils.wait_for_output(strcmd2)
     return output
 
 def oc_port_expose(self, service_name):
@@ -107,12 +92,7 @@ def oc_port_expose(self, service_name):
         service_name (str): name of the service to be exposed outside
     '''
     strcmd = "vagrant ssh -c 'oc expose service " +service_name +"'"
-    time.sleep(60)
-    output = "FAIL"
-    try:
-        output = process.system_output(strcmd)
-    except:
-        return output
+    output = openshiftUtils.wait_for_output(strcmd)
     return output
 
 def oc_get_service(self):
@@ -122,11 +102,7 @@ def oc_get_service(self):
         self (object): Object of the current method
     '''
     strcmd = "vagrant ssh -c 'oc get service'"
-    output = "FAIL"
-    try:
-        output = process.system_output(strcmd)
-    except:
-        return output
+    output = openshiftUtils.wait_for_output(strcmd)
     return output
 
 def oc_get_pod(self):
@@ -136,11 +112,7 @@ def oc_get_pod(self):
         self (object): Object of the current method
     '''
     strcmd = "vagrant ssh -c 'oc get pod'"
-    output = "FAIL"
-    try:
-        output = process.system_output(strcmd)
-    except:
-        return output
+    output = openshiftUtils.wait_for_output(strcmd)
     return output
 
 def routing_cdk(self, service_name, openshift_project_name):
@@ -151,17 +123,14 @@ def routing_cdk(self, service_name, openshift_project_name):
         service_name (string): name of the service to be exposed outside
         openshift_project_name (string): name of the project to be added to the openshift server
     '''
-    time.sleep(60)
-    output = "FAIL"
     strcmd = "vagrant ssh -c 'oc get route'"
-    try:
-        output = process.system_output(strcmd)
-        for lines in output.split():
-            if service_name +"-" +openshift_project_name in lines:
-                strcmd = "curl -I http://" +lines
-                output = process.system_output(strcmd)
-    except:
+    output = openshiftUtils.wait_for_output(strcmd)
+    if output == "FAIL":
         return output
+    for lines in output.split():
+        if service_name +"-" +openshift_project_name in lines:
+            strcmd = "curl -I http://" +lines
+            output = openshiftUtils.wait_for_text_in_output(strcmd, text = "HTTP/1.1 200 OK")
     return output
 
 def oc_delete(self, project_name):
@@ -188,11 +157,7 @@ def oc_logout(self):
     '''
     strcmd = "vagrant ssh -c 'oc logout'"
     self.log.info ("Executing : " +strcmd)
-    output = "FAIL"
-    try:
-        output = process.system_output(strcmd)
-    except:
-        return output
+    output = openshiftUtils.wait_for_output(strcmd)
     return output
 
 def add_new_template(self, template):
@@ -206,10 +171,8 @@ def add_new_template(self, template):
     self.log.info ("Executing : " +strcmd)
         
     lst = []
-    output = "FAIL"
-    try:
-        output = process.system_output(strcmd)
-    except:
+    output = openshiftUtils.wait_for_output(strcmd)
+    if output == "FAIL":
         return output
     for lines in output.splitlines():
         if template in lines:
@@ -218,17 +181,11 @@ def add_new_template(self, template):
     lst = lst[len(lst) - 1].split("'") 
     strcmd1 = "vagrant ssh -c " +"'" +lst[1] +"'"
     self.log.info ("Executing : " +strcmd1) 
-    time.sleep(30)
-    try:
-        output = process.system_output(strcmd1)
-    except:
+    output = openshiftUtils.wait_for_output(strcmd1)
+    if output == "FAIL":
         return output
     
     strcmd2 = "vagrant ssh -c 'oc status -v'"
     self.log.info ("Executing : " +strcmd2)
-    time.sleep(2)
-    try:
-        output = process.system_output(strcmd2)
-    except:
-        return output
+    output = openshiftUtils.wait_for_output(strcmd2)
     return output

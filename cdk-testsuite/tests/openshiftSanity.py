@@ -34,42 +34,20 @@ def new_project(self, port, username, password, projectname, registry, servicena
     
     if not tempalte:
         output = openshift.add_new_app(self, registry)
-        partenLst = []
         lst = registry.split("/")
         repo = lst[len(lst) - 1]
-        for lines in output.splitlines():
-            parten = re.search(r"^(?=.*?\b\\*\b)(?=.*?\bfailed\b)(?=.*?\b%s\b).*$" %repo, lines)
-            partenLst.append(parten)
-        match = "NotFound"
-        for i in partenLst:
-            if i != None:
-                match = "Found"
-                break
-        self.assertIn("NotFound", match, registry +" deployment failed")
+        parten = re.search(r"^(?=.*?\b\\*\b)(?=.*?\bfailed\b)(?=.*?\b%s\b).*$" %repo, output)
+        if parten:
+            self.assertIn(parten, output, registry +" deployment failed")
     else:
         output = openshift.add_new_template(self, registry)
-        partenLst = []
-        for lines in output.splitlines():
-            parten = re.search(r"^(?=.*?\b\\*\b)(?=.*?\bfailed\b)(?=.*?\b%s\b).*$" %registry, lines)
-            partenLst.append(parten)
-        match = "NotFound"
-        for i in partenLst:
-            if i != None:
-                match = "Found"
-                break
-        self.assertIn("NotFound", match, registry +" deployment failed")
+        parten = re.search(r"^(?=.*?\b\\*\b)(?=.*?\bfailed\b)(?=.*?\b%s\b).*$" %registry, output)
+        if parten:
+            self.assertIn(parten, output, registry +" deployment failed")
         if "default" not in dbservicename:
-            del partenLst[:]
-            for lines in output.splitlines():
-                parten = re.search(r"^(?=.*?\bdeploys\b)(?=.*?\b%s\b)(?=.*?\bopenshift/%s\b).*$" %(dbservicename, dbservicename), lines)
-                partenLst.append(parten)
-            match = "NotFound"
-            for i in partenLst:
-                if i != None:
-                    match = "Found"
-                    break
-            self.assertIn("Found", match, dbservicename +" deployment failed")
-            
+            parten = re.search(r"^(?=.*?\bdeploys\b)(?=.*?\b%s\b)(?=.*?\bopenshift/%s\b).*$" %(dbservicename, dbservicename), output)
+            if parten:
+                self.assertIn(parten, output, dbservicename +" deployment failed")
     if not tempalte:    
         output = openshift.oc_port_expose(self, servicename)
         self.assertIn("exposed", output, "Service failed to expose " +projectname)
@@ -84,6 +62,13 @@ def new_project(self, port, username, password, projectname, registry, servicena
                                         
     output = openshift.oc_delete(self, projectname)
     self.assertIn("deleted", output, "Failed to delete " +projectname)
+    
+def clean_failed_app(self, projectname):
+    output = openshift.oc_delete(self, projectname)
+    if output == "FAIL":
+        self.log.info("No failed " +projectname +" found")
+    else:
+        self.log.info("Failed " +projectname +" deleted")
     
 class OpenshiftTests(Test):
 
@@ -132,7 +117,7 @@ class OpenshiftTests(Test):
         new_project(self, self.params.get('openshift_WC_PORT'), self.params.get('openshift_USERNAME'), 
                               self.params.get('openshift_PASSWORD'), self.params.get('openshift_python_PROJECT'), 
                               self.params.get('openshift_python_REGISTRY'), self.params.get('service_python_NAME'))
-        
+    
     def test_ruby_project(self):
         '''
         Runs sanity on openshift s2i ruby source
@@ -153,6 +138,7 @@ class OpenshiftTests(Test):
             openshift_ruby_REGISTRY (string): ruby registry path/location
             service_ruby_NAME (string): name of the ruby service to be exposed outside
         '''
+        clean_failed_app(self, self.params.get('openshift_python_PROJECT'))
         new_project(self, self.params.get('openshift_WC_PORT'), self.params.get('openshift_USERNAME'), 
                               self.params.get('openshift_PASSWORD'), self.params.get('openshift_ruby_PROJECT'), 
                               self.params.get('openshift_ruby_REGISTRY'), self.params.get('service_ruby_NAME'))
@@ -177,6 +163,7 @@ class OpenshiftTests(Test):
             openshift_perl_REGISTRY (string): perl registry path/location
             service_perl_NAME (string): name of the perl service to be exposed outside
         '''
+        clean_failed_app(self, self.params.get('openshift_ruby_PROJECT'))
         new_project(self, self.params.get('openshift_WC_PORT'), self.params.get('openshift_USERNAME'), 
                               self.params.get('openshift_PASSWORD'), self.params.get('openshift_perl_PROJECT'), 
                               self.params.get('openshift_perl_REGISTRY'), self.params.get('service_perl_NAME'))
@@ -201,6 +188,7 @@ class OpenshiftTests(Test):
             openshift_nodejs_REGISTRY (string): nodejs registry path/location
             service_nodejs_NAME (string): name of the nodejs service to be exposed outside
         '''
+        clean_failed_app(self, self.params.get('openshift_perl_PROJECT'))
         new_project(self, self.params.get('openshift_WC_PORT'), self.params.get('openshift_USERNAME'), 
                               self.params.get('openshift_PASSWORD'), self.params.get('openshift_nodejs_PROJECT'), 
                               self.params.get('openshift_nodejs_REGISTRY'), self.params.get('service_nodejs_NAME'))
@@ -226,6 +214,7 @@ class OpenshiftTests(Test):
             service_php_NAME (string): name of the php service to be exposed outside
             tepmlate (boolean): True if using 
         '''
+        clean_failed_app(self, self.params.get('openshift_nodejs_PROJECT'))
         new_project(self, self.params.get('openshift_WC_PORT'), self.params.get('openshift_USERNAME'), 
                               self.params.get('openshift_PASSWORD'), self.params.get('openshift_php_PROJECT'), 
                               self.params.get('openshift_php_template'), self.params.get('service_php_NAME'), 
@@ -253,6 +242,7 @@ class OpenshiftTests(Test):
             tepmlate (boolean): True if using
             dbservicename (string): Takes name of the database service name 
         '''
+        clean_failed_app(self, self.params.get('openshift_php_PROJECT'))
         new_project(self, self.params.get('openshift_WC_PORT'), self.params.get('openshift_USERNAME'), 
                               self.params.get('openshift_PASSWORD'), self.params.get('openshift_nodejsmongodb_PROJECT'), 
                               self.params.get('openshift_nodejsmongodb_TEMPLATE'), self.params.get('service_nodejsmongodb_NAME'), 
@@ -264,6 +254,7 @@ class OpenshiftTests(Test):
         Args:
             self (object): Object of the current method
         '''
+        clean_failed_app(self, self.params.get('openshift_nodejsmongodb_PROJECT'))
         output = openshift.oc_logout(self)
         logout_str = "Logged " +"\"" +self.params.get('openshift_USERNAME') +"\"" +" out on " +"\"https://"
         self.assertIn(logout_str, output, "Failed to log out")

@@ -82,7 +82,7 @@ class VagrantSanity(Test):
 	cmd = "vagrant ssh -c 'uname'"
         self.log.info("Checking the ssh access into the vagrant box...")
         out = process.run(cmd, shell=True)
-        self.assertEqual("Linux\r\n", out.stdout)
+        self.assertEqual("Linux\n", out.stdout)
 	self.log.info("ssh access into the vagrant box is successful...")
 
     def test_vagrant_suspend(self):

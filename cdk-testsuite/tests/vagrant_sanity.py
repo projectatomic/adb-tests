@@ -12,7 +12,7 @@ class VagrantSanity(Test):
 	self.vagrant_RHN_PASSWORD = self.params.get('vagrant_RHN_PASSWORD')
 	self.platform = platform.system()
 	self.sudo_PASSWORD = self.params.get('sudo_PASSWORD')
-	self.suspended_state = ["paused", "saved"]
+	self.suspended_state = ["paused", "saved", "shutoff"]
 	self.halt_state = ["off", "shutoff", "poweroff"]
 	self.registration_required = self.credentials_exported = False
 	self.vagrant_file = os.path.join(self.vagrant_VAGRANTFILE_DIR, "Vagrantfile") 

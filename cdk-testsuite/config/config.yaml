@@ -1,35 +1,37 @@
-#Set the path correspondence to the vagrant file
-path_linux : '/path/to/vagtantupdir'
-path_win : '/path/to/vagtantupdir'
-path_mac : '/path/to/vagtantupdir'
+#Set the path correspondence to the vagrant file details
+vagrant_VAGRANTFILE_DIR : ""
+vagrant_PROVIDER : ""
+vagrant_RHN_USERNAME : ""
+vagrant_RHN_PASSWORD : ""
+sudo_PASSWORD: ""
 #Set the path openshift library module
-openshift_lib_MODULE : '/path/to/openshift/library/module'
-openshift_util_MODULE : '/path/to/openshift/util/module'
+openshift_lib_MODULE : ""
+openshift_util_MODULE : ""
 #Set openshift credentials
-openshift_USERNAME : 'openshift-dev'
-openshift_PASSWORD : 'devel'
-openshift_WC_PORT : '8443'
+openshift_USERNAME : "openshift-dev"
+openshift_PASSWORD : "devel"
+openshift_WC_PORT : "8443"
 #Set the project inputs (python project name, python registry path and python service name). It uses image from redhat registry.
-openshift_python_PROJECT : 'test-python27'
-openshift_python_REGISTRY : 'registry.access.redhat.com/rhscl/python-27-rhel7~https://github.com/openshift/django-ex' 
+openshift_python_PROJECT : "test-python27"
+openshift_python_REGISTRY : "registry.access.redhat.com/rhscl/python-27-rhel7~https://github.com/openshift/django-ex" 
 service_python_NAME : "django-ex"
 #Set the project inputs (ruby project name, ruby registry path and ruby service name). It uses image from docker registry.
-openshift_ruby_PROJECT : 'test-ruby'
-openshift_ruby_REGISTRY : 'openshift/ruby-20-centos7~https://github.com/openshift/ruby-hello-world' 
+openshift_ruby_PROJECT : "test-ruby"
+openshift_ruby_REGISTRY : "openshift/ruby-20-centos7~https://github.com/openshift/ruby-hello-world" 
 service_ruby_NAME : "ruby-hello-world"
 #Set the project inputs (perl project name, perl registry path and perl service name). It uses image from redhat registry.
-openshift_perl_PROJECT : 'test-perl'
-openshift_perl_REGISTRY : 'registry.access.redhat.com/rhscl/perl-520-rhel7~https://github.com/openshift/dancer-ex' 
+openshift_perl_PROJECT : "test-perl"
+openshift_perl_REGISTRY : "registry.access.redhat.com/rhscl/perl-520-rhel7~https://github.com/openshift/dancer-ex" 
 service_perl_NAME : "dancer-ex"
 #Set the project inputs (nodejs project name, nodejs registry path and nodejs service name). It uses image from redhat registry.
-openshift_nodejs_PROJECT : 'test-nodejs'
-openshift_nodejs_REGISTRY : 'registry.access.redhat.com/rhscl/nodejs-4-rhel7~https://github.com/openshift/nodejs-ex' 
+openshift_nodejs_PROJECT : "test-nodejs"
+openshift_nodejs_REGISTRY : "registry.access.redhat.com/rhscl/nodejs-4-rhel7~https://github.com/openshift/nodejs-ex" 
 service_nodejs_NAME : "nodejs-ex"
 #Set the project inputs (php project name, template name and php service name). It uses the template provided by openshift.
-openshift_php_PROJECT : 'test-php'
-openshift_php_template : 'cakephp-example' 
+openshift_php_PROJECT : "test-php"
+openshift_php_template : "cakephp-example" 
 service_php_NAME : "cakephp-example"
 #Set the project inputs (phpnodejs+mongodb project name, template name and php service name). It uses the template provided by openshift.
-openshift_nodejsmongodb_PROJECT : 'test-nodejs-mongodb'
-openshift_nodejsmongodb_TEMPLATE : 'nodejs-mongodb-example' 
+openshift_nodejsmongodb_PROJECT : "test-nodejs-mongodb"
+openshift_nodejsmongodb_TEMPLATE : "nodejs-mongodb-example" 
 service_nodejsmongodb_NAME : "nodejs-mongodb-example"

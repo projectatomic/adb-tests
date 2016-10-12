@@ -5,11 +5,12 @@ Created on Jun 29, 2016
 '''
 from avocado import Test
 from avocado import VERSION
-import imp
+import imp, pexpect
 import logging
 import os
 import platform
 import re
+import vagrant
 
 log = logging.getLogger("Openshift.Debug")
 
@@ -78,22 +79,41 @@ class OpenshiftTests(Test):
         Arg:
             self (object): Object of the current method
         '''
-        if platform.system() == "Linux":
-            os.chdir(self.params.get('path_linux'))
-            self.log.info(self.params.get('path_linux'))
-        elif platform.system() == "Darwin":
-            os.chdir(self.params.get('path_mac'))
-            self.log.info(self.params.get('path_mac'))
-        else:
-            os.chdir(self.params.get('path_win'))
-            self.log.info(self.params.get('path_win'))
         global openshift
         openshift = imp.load_source('openshift', self.params.get('openshift_lib_MODULE'))
         self.log.info("###########################################################################################")
         self.log.info(openshift.openshiftLibInfo(self))
         self.log.info("Avocado version : %s" % VERSION)
         self.log.info("###########################################################################################")
-               
+
+        self.vagrant_VAGRANTFILE_DIR = self.params.get('vagrant_VAGRANTFILE_DIR')
+        self.vagrant_PROVIDER = self.params.get('vagrant_PROVIDER')
+        self.vagrant_RHN_USERNAME = self.params.get('vagrant_RHN_USERNAME')
+        self.vagrant_RHN_PASSWORD = self.params.get('vagrant_RHN_PASSWORD')
+        self.platform = platform.system()
+        self.sudo_PASSWORD = self.params.get('sudo_PASSWORD')
+        self.v = vagrant.Vagrant(self.vagrant_VAGRANTFILE_DIR)
+        os.chdir(self.vagrant_VAGRANTFILE_DIR)
+
+
+
+    def test_vagrant_up_with_subscription(self):
+        ''' vagrant up with registration to RHN '''
+        self.test_remove_vm()
+        self.log.info("Brining up the vagrant box and registering to RHN...")
+        os.environ["SUB_USERNAME"] = self.vagrant_RHN_USERNAME
+        os.environ["SUB_PASSWORD"] = self.vagrant_RHN_PASSWORD
+        cmd = "vagrant up --provider %s" %(self.vagrant_PROVIDER)
+        child = pexpect.spawn (cmd)
+        
+        rc = child.expect(pexpect.EOF, timeout=None)
+        self.assertEqual(0, rc)
+        out = self.v.status()
+        state = re.search(r"state='(.*)',", str(out) ).group(1)
+        self.assertEqual("running", state, "The vagrant box is not up")
+
+
+              
     def test_python_project(self):
         '''
         Runs sanity on openshift s2i python source
@@ -258,3 +278,8 @@ class OpenshiftTests(Test):
         output = openshift.oc_logout(self)
         logout_str = "Logged " +"\"" +self.params.get('openshift_USERNAME') +"\"" +" out on " +"\"https://"
         self.assertIn(logout_str, output, "Failed to log out")
+
+    def test_remove_vm(self):
+        self.log.info("Destroying the vagrant box...")
+        os.chdir(self.vagrant_VAGRANTFILE_DIR)
+        self.v.destroy()

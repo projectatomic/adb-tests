@@ -76,7 +76,7 @@ def add_new_app(self, registry):
     strcmd1 = "vagrant ssh -c " +"'" +lst[1] +"'"
     self.log.info ("Executing : " +strcmd1) 
                        
-    output = openshiftUtils.wait_for_output(strcmd1)
+    output = openshiftUtils.wait_for_output(strcmd1, timeout = 600)
     if output == "FAIL":
         return output
     strcmd2 = "vagrant ssh -c 'oc status -v'"

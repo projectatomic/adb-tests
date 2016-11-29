@@ -2,7 +2,7 @@
 
 from avocado import Test
 from avocado.utils import process
-import os, re, vagrant, platform
+import os, re, pexpect, vagrant, platform
 
 class VagrantSshfs(Test):
     def setUp(self):
